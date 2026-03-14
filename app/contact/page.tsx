@@ -620,7 +620,7 @@ export default function ContactPage() {
             </div>
             {[
               { title: "Products", links: [{ label: "Split-Type", href: "/shop?type=split" }, { label: "Cassette", href: "/shop?type=cassette" }, { label: "Ducted", href: "/shop?type=ducted" }, { label: "Portable", href: "/shop?type=portable" }, { label: "Multi-Split", href: "/shop?type=multi-split" }] },
-              { title: "Company", links: [{ label: "About Us", href: "/about" }, { label: "Careers", href: "/careers" }, { label: "Press", href: "/press" }, { label: "Contact", href: "/contact" }] },
+              { title: "Company", links: [{ label: "About Us", href: "/about" }, { label: "Careers", href: "/careers" }, { label: "Contact", href: "/contact" }] },
               { title: "Support", links: [{ label: "Installation", href: "/support/installation" }, { label: "Warranty", href: "/support/warranty" }, { label: "Returns", href: "/support/returns" }, { label: "FAQ", href: "/faq" }] },
             ].map((col) => (
               <div key={col.title}>
