@@ -181,7 +181,7 @@ export default function ShopPage() {
       {/* ── Navbar ── */}
       <header style={{ position:"fixed", top:0, left:0, right:0, zIndex:50, transition:"all .3s" }}>
         <div className={scrolled ? "glass" : ""} style={{ transition:"all .3s", borderBottom: scrolled ? "1px solid rgba(0,0,0,0.07)" : "1px solid transparent" }}>
-          <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"0 24px", height:"68px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:"16px" }}>
+          <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"0 24px", height:"68px", display:"grid", gridTemplateColumns:"1fr auto 1fr", alignItems:"center" }}>
 
             {/* Logo */}
             <Link href="/" style={{ display:"flex", alignItems:"center", gap:"8px", textDecoration:"none", flexShrink:0 }}>
@@ -192,8 +192,8 @@ export default function ShopPage() {
             </Link>
 
             {/* Nav links — desktop */}
-            <nav style={{ display:"flex", alignItems:"center", gap:"28px", flex:1, justifyContent:"center" }} className="hidden md:flex">
-              {([["Features","/#features"],["About","/about"],["Contact","/contact"],["Shop","/shop"],["Services","/services"]] as [string,string][]).map(([label,href]) => (
+            <nav style={{ display:"flex", alignItems:"center", gap:"28px", justifyContent:"center" }} className="hidden md:flex">
+              {([["Shop","/shop"],["Services","/services"],["Contact","/contact"],["About","/about"]] as [string,string][]).map(([label,href]) => (
                 <Link key={label} href={href} className="nav-link"
                   style={{ color: label==="Shop" ? "#d97706" : "#6b7280", fontSize:"14px", fontWeight: label==="Shop" ? 600 : 500, textDecoration:"none", transition:"color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color="#1a1a2e")}
@@ -203,7 +203,7 @@ export default function ShopPage() {
             </nav>
 
             {/* Auth + cart */}
-            <div style={{ display:"flex", alignItems:"center", gap:"10px", flexShrink:0 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"10px", justifyContent:"flex-end" }}>
               <Link href="/cart" style={{ position:"relative", width:"40px", height:"40px", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.1)", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none", transition:"all .2s", flexShrink:0 }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor="rgba(217,119,6,.4)"; e.currentTarget.style.background="#fffbf2"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor="rgba(0,0,0,0.1)"; e.currentTarget.style.background="#fff"; }}
@@ -269,11 +269,10 @@ export default function ShopPage() {
           <button onClick={() => setMobileNavOpen(false)} style={{ position:"absolute", top:"20px", right:"24px", display:"flex", alignItems:"center", justifyContent:"center", width:"38px", height:"38px", borderRadius:"10px", border:"1.5px solid rgba(0,0,0,0.12)", background:"transparent", cursor:"pointer" }}>
             <X size={18} color="#1a1a2e" />
           </button>
-          <a href="/#features" onClick={() => setMobileNavOpen(false)}>Features</a>
-          <a href="/about" onClick={() => setMobileNavOpen(false)}>About</a>
-          <a href="/contact" onClick={() => setMobileNavOpen(false)}>Contact</a>
           <Link href="/shop" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#d97706", textDecoration:"none", letterSpacing:"-0.5px" }}>Shop</Link>
           <Link href="/services" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#1a1a2e", textDecoration:"none", letterSpacing:"-0.5px" }}>Services</Link>
+          <Link href="/contact" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#1a1a2e", textDecoration:"none", letterSpacing:"-0.5px" }}>Contact</Link>
+          <Link href="/about" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#1a1a2e", textDecoration:"none", letterSpacing:"-0.5px" }}>About</Link>
           <div style={{ display:"flex", gap:"12px", marginTop:"8px" }}>
             {!user && (
               <>

@@ -257,7 +257,7 @@ export default function ContactPage() {
       {/* ── Navbar (identical to landing) ── */}
       <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, transition: "all .3s" }}>
         <div className={scrolled ? "glass" : ""} style={{ transition: "all .3s", borderBottom: scrolled ? "1px solid rgba(0,0,0,0.07)" : "1px solid transparent" }}>
-          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", height: "68px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", height: "68px", display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none", flexShrink: 0 }}>
               <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <Triangle size={13} color="#fff" fill="#fff" />
@@ -265,19 +265,17 @@ export default function ContactPage() {
               <span className="brand" style={{ color: "#1a1a2e", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.5px", whiteSpace: "nowrap" }}>EMEREN</span>
             </Link>
 
-            <nav style={{ display: "flex", alignItems: "center", gap: "28px", flex: 1, justifyContent: "center" }} className="hidden md:flex">
-              {["Features", "About", "Contact"].map((n) => (
-                <a key={n} href={n === "Contact" ? "/contact" : `/#${n.toLowerCase()}`} className="nav-link"
-                  style={{ color: n === "Contact" ? "#d97706" : "#6b7280", fontSize: "14px", fontWeight: n === "Contact" ? 600 : 500, textDecoration: "none", transition: "color .2s" }}
+            <nav style={{ display: "flex", alignItems: "center", gap: "28px", justifyContent: "center" }} className="hidden md:flex">
+              {([["Shop", "/shop"], ["Services", "/services"], ["Contact", "/contact"], ["About", "/about"]] as [string, string][]).map(([label, href]) => (
+                <Link key={label} href={href} className="nav-link"
+                  style={{ color: label === "Contact" ? "#d97706" : "#6b7280", fontSize: "14px", fontWeight: label === "Contact" ? 600 : 500, textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = n === "Contact" ? "#d97706" : "#6b7280")}
-                >{n}</a>
+                  onMouseLeave={(e) => (e.currentTarget.style.color = label === "Contact" ? "#d97706" : "#6b7280")}
+                >{label}</Link>
               ))}
-              <Link href="/shop" className="nav-link" style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")} onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}>Shop</Link>
-              <Link href="/services" className="nav-link" style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")} onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}>Services</Link>
             </nav>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
               {user ? (
                 <div style={{ position: "relative" }} ref={userMenuRef}>
                   <button onClick={() => setUserMenuOpen((v) => !v)} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", maxWidth: "200px" }}>
@@ -316,11 +314,10 @@ export default function ContactPage() {
       {mobileNavOpen && (
         <div className="mobile-nav">
           <button onClick={() => setMobileNavOpen(false)} style={{ position: "absolute", top: "20px", right: "24px", display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer" }}><X size={18} color="#1a1a2e" /></button>
-          <a href="/#features" onClick={() => setMobileNavOpen(false)}>Features</a>
-          <a href="/about" onClick={() => setMobileNavOpen(false)}>About</a>
-          <a href="/contact" onClick={() => setMobileNavOpen(false)}>Contact</a>
           <Link href="/shop" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Shop</Link>
           <Link href="/services" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Services</Link>
+          <Link href="/contact" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#d97706", textDecoration: "none", letterSpacing: "-0.5px" }}>Contact</Link>
+          <Link href="/about" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>About</Link>
           <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
             {!user && (<><Link href="/auth/signin" className="ghost-btn" onClick={() => setMobileNavOpen(false)} style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, textDecoration: "none" }}>Sign In</Link><Link href="/auth/signup" className="cta-btn" onClick={() => setMobileNavOpen(false)} style={{ padding: "11px 24px", fontSize: "14px", textDecoration: "none" }}>Get Started</Link></>)}
             {user && (<button onClick={() => { handleSignOut(); setMobileNavOpen(false); }} className="ghost-btn" style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, border: "1.5px solid rgba(239,68,68,0.3)", color: "#ef4444", borderRadius: "12px", background: "transparent", cursor: "pointer" }}>Sign Out</button>)}
@@ -364,14 +361,14 @@ export default function ContactPage() {
             {
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="#d97706"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>,
               label: "Facebook",
-              value: "Emeren Aircon and Refrigeration Services",
+              value: "Emeren Philippines",
               sub: "Message us on Facebook",
               href: "https://facebook.com/emeren.ph",
             },
             {
               icon: <MapPin size={20} color="#d97706" />,
               label: "Visit Us",
-              value: "Sabang, Baliuag, Bulacan",
+              value: "Baliuag, Bulacan",
               sub: "Showroom open daily",
               href: "https://maps.google.com",
             },
@@ -504,7 +501,7 @@ export default function ContactPage() {
                 </div>
               </div>
               <div style={{ padding: "16px 20px" }}>
-                <a href="https://www.google.com/maps/place/Emeren+Aircon+%26+Refrigeration+Parts+%26+Services/@14.9660995,120.9051816,17z/data=!3m1!4b1!4m6!3m5!1s0x3397001af00e9c79:0x8392e70f15210957!8m2!3d14.9660995!4d120.9051816!16s%2Fg%2F11s8kbs7bv?entry=ttu&g_ep=EgoyMDI2MDMxMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="ghost-btn" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "9px 16px", fontSize: "13px", fontWeight: 600, textDecoration: "none", width: "100%" }}>
+                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="ghost-btn" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "9px 16px", fontSize: "13px", fontWeight: 600, textDecoration: "none", width: "100%" }}>
                   <MapPin size={13} color="#374151" />
                   Get Directions
                 </a>

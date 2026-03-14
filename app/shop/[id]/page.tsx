@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import {
   Triangle, ArrowLeft, ArrowRight, Star, Check, ShoppingCart,
   User, LogOut, Phone, MapPin, Clock, ChevronRight,
-  Shield, Wrench, Truck, Wind, Zap, Thermometer,
+  Shield, Wrench, Truck, Wind, Zap, Thermometer, Menu, X,
 } from "lucide-react";
 import { ALL_PRODUCTS, BADGE_COLORS, type Variant } from "@/lib/products";
 
@@ -26,6 +26,8 @@ export default function ProductPage() {
   const [scrolled,      setScrolled]      = useState(false);
   const [activeTab,     setActiveTab]     = useState<"features"|"specs">("features");
   const [imgError,      setImgError]      = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (product) setSelectedVariant(product.variants[0]);
@@ -42,6 +44,24 @@ export default function ProductPage() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Close user dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [userMenuOpen]);
+
+  // Close mobile nav on resize to desktop
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth >= 768) setMobileNavOpen(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
@@ -52,7 +72,6 @@ export default function ProductPage() {
     const supabase = createClient();
     await supabase.auth.signOut();
     setUser(null); setUserMenuOpen(false);
-    router.push("/");
   };
 
   const handleAdd = () => {
@@ -119,28 +138,47 @@ export default function ProductPage() {
         }
         .related-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.09); border-color:rgba(217,119,6,.2); }
         .spec-row:nth-child(odd) { background:rgba(0,0,0,0.02); }
+        .mobile-nav {
+          position:fixed; inset:0;
+          background:rgba(248,247,244,0.97);
+          backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+          z-index:40; display:flex; flex-direction:column;
+          align-items:center; justify-content:center; gap:32px;
+        }
+        .mobile-nav a {
+          font-family:'Outfit',sans-serif; font-size:28px; font-weight:700;
+          color:#1a1a2e; text-decoration:none; letter-spacing:-0.5px; transition:color .2s;
+        }
+        .mobile-nav a:hover { color:#d97706; }
+        @media (min-width:768px) { .mobile-menu-btn { display:none !important; } }
       `}</style>
 
       {/* ── Navbar ── */}
-      <header style={{ position:"fixed", top:0, left:0, right:0, zIndex:50 }}>
-        <div className={scrolled ? "glass" : ""} style={{ transition:"all .3s" }}>
-          <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"0 24px", height:"68px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-            <Link href="/" style={{ display:"flex", alignItems:"center", gap:"8px", textDecoration:"none" }}>
+      <header style={{ position:"fixed", top:0, left:0, right:0, zIndex:50, transition:"all .3s" }}>
+        <div className={scrolled ? "glass" : ""} style={{ transition:"all .3s", borderBottom: scrolled ? "1px solid rgba(0,0,0,0.07)" : "1px solid transparent" }}>
+          <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"0 24px", height:"68px", display:"grid", gridTemplateColumns:"1fr auto 1fr", alignItems:"center" }}>
+
+            {/* Logo */}
+            <Link href="/" style={{ display:"flex", alignItems:"center", gap:"8px", textDecoration:"none", flexShrink:0 }}>
               <span style={{ width:"30px", height:"30px", borderRadius:"8px", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 3px 10px rgba(217,119,6,0.3)" }}>
                 <Triangle size={13} color="#fff" fill="#fff" />
               </span>
-              <span className="brand" style={{ color:"#1a1a2e", fontSize:"20px", fontWeight:800 }}>EMEREN</span>
+              <span className="brand" style={{ color:"#1a1a2e", fontSize:"20px", fontWeight:800, whiteSpace:"nowrap" }}>EMEREN</span>
             </Link>
-            <nav style={{ display:"flex", alignItems:"center", gap:"32px" }}>
-              {[["Products","/shop"],["Services","/services"],["About","/about"],["Contact","/#contact"]].map(([label,href]) => (
+
+            {/* Nav links — desktop */}
+            <nav style={{ display:"flex", alignItems:"center", gap:"28px", justifyContent:"center" }} className="hidden md:flex">
+              {([["Shop","/shop"],["Services","/services"],["Contact","/contact"],["About","/about"]] as [string,string][]).map(([label,href]) => (
                 <Link key={label} href={href} className="nav-link"
-                  style={{ color:"#6b7280", fontSize:"14px", fontWeight:500, textDecoration:"none", transition:"color .2s" }}
+                  style={{ color: label==="Shop" ? "#d97706" : "#6b7280", fontSize:"14px", fontWeight: label==="Shop" ? 600 : 500, textDecoration:"none", transition:"color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color="#1a1a2e")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color="#6b7280")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color= label==="Shop" ? "#d97706" : "#6b7280")}
                 >{label}</Link>
               ))}
             </nav>
-            <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+
+            {/* Auth + cart */}
+            <div style={{ display:"flex", alignItems:"center", gap:"10px", justifyContent:"flex-end" }}>
               <Link href="/cart" style={{ position:"relative", width:"40px", height:"40px", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.1)", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none", transition:"all .2s", flexShrink:0 }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor="rgba(217,119,6,.4)"; e.currentTarget.style.background="#fffbf2"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor="rgba(0,0,0,0.1)"; e.currentTarget.style.background="#fff"; }}
@@ -152,14 +190,15 @@ export default function ProductPage() {
                   </span>
                 )}
               </Link>
+
               {user ? (
-                <div style={{ position:"relative" }}>
+                <div style={{ position:"relative" }} ref={userMenuRef}>
                   <button onClick={() => setUserMenuOpen((v) => !v)}
-                    style={{ display:"flex", alignItems:"center", gap:"8px", padding:"7px 14px", borderRadius:"12px", border:"1.5px solid rgba(217,119,6,0.3)", background:"rgba(217,119,6,0.06)", cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-                    <div style={{ width:"24px", height:"24px", borderRadius:"50%", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                    style={{ display:"flex", alignItems:"center", gap:"8px", padding:"7px 14px", borderRadius:"12px", border:"1.5px solid rgba(217,119,6,0.3)", background:"rgba(217,119,6,0.06)", cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", maxWidth:"200px" }}>
+                    <div style={{ width:"24px", height:"24px", borderRadius:"50%", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                       <User size={13} color="#fff" />
                     </div>
-                    <span style={{ fontSize:"13px", fontWeight:600, color:"#1a1a2e", maxWidth:"120px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    <span style={{ fontSize:"13px", fontWeight:600, color:"#1a1a2e", maxWidth:"100px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                       {user.email.split("@")[0]}
                     </span>
                   </button>
@@ -169,18 +208,15 @@ export default function ProductPage() {
                         <p style={{ fontSize:"11px", color:"#9ca3af", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.05em" }}>Signed in as</p>
                         <p style={{ fontSize:"13px", fontWeight:700, color:"#1a1a2e", marginTop:"2px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.email}</p>
                       </div>
-                      <Link href="/profile" style={{ display:"flex", alignItems:"center", gap:"8px", padding:"9px 12px", borderRadius:"9px", fontSize:"13px", fontWeight:600, color:"#374151", textDecoration:"none" }} onClick={() => setUserMenuOpen(false)}>
-                        <User size={14} /> My Profile
-                      </Link>
-                      <button onClick={handleSignOut} style={{ width:"100%", display:"flex", alignItems:"center", gap:"8px", padding:"9px 12px", borderRadius:"9px", border:"none", background:"none", cursor:"pointer", fontSize:"13px", fontWeight:600, color:"#ef4444", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-                        <LogOut size={14} /> Sign Out
-                      </button>
+                      <Link href="/shop" style={{ display:"flex", alignItems:"center", gap:"8px", padding:"9px 12px", borderRadius:"9px", fontSize:"13px", fontWeight:600, color:"#374151", textDecoration:"none" }} onMouseEnter={(e) => (e.currentTarget.style.background="rgba(0,0,0,0.04)")} onMouseLeave={(e) => (e.currentTarget.style.background="none")} onClick={() => setUserMenuOpen(false)}>Browse Shop</Link>
+                      <Link href="/profile" style={{ display:"flex", alignItems:"center", gap:"8px", padding:"9px 12px", borderRadius:"9px", fontSize:"13px", fontWeight:600, color:"#374151", textDecoration:"none" }} onMouseEnter={(e) => (e.currentTarget.style.background="rgba(0,0,0,0.04)")} onMouseLeave={(e) => (e.currentTarget.style.background="none")} onClick={() => setUserMenuOpen(false)}><User size={14} /> My Profile</Link>
+                      <button onClick={handleSignOut} style={{ width:"100%", display:"flex", alignItems:"center", gap:"8px", padding:"9px 12px", borderRadius:"9px", border:"none", background:"none", cursor:"pointer", fontSize:"13px", fontWeight:600, color:"#ef4444", fontFamily:"'Plus Jakarta Sans',sans-serif" }} onMouseEnter={(e) => (e.currentTarget.style.background="rgba(239,68,68,0.06)")} onMouseLeave={(e) => (e.currentTarget.style.background="none")}><LogOut size={14} /> Sign Out</button>
                     </div>
                   )}
                 </div>
               ) : (
                 <>
-                  <Link href="/auth/signin" style={{ padding:"8px 18px", fontSize:"13px", fontWeight:600, textDecoration:"none", color:"#374151", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.12)", transition:"all .2s" }}
+                  <Link href="/auth/signin" className="hidden sm:flex" style={{ padding:"8px 18px", fontSize:"13px", fontWeight:600, textDecoration:"none", color:"#374151", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.12)", transition:"all .2s", display:"flex", alignItems:"center" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor="rgba(217,119,6,.5)"; e.currentTarget.style.color="#d97706"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor="rgba(0,0,0,0.12)"; e.currentTarget.style.color="#374151"; }}
                   >Sign In</Link>
@@ -190,10 +226,41 @@ export default function ProductPage() {
                   >Get Started <ArrowRight size={13} /></Link>
                 </>
               )}
+
+              {/* Mobile hamburger */}
+              <button className="mobile-menu-btn" onClick={() => setMobileNavOpen((v) => !v)}
+                style={{ display:"flex", alignItems:"center", justifyContent:"center", width:"38px", height:"38px", borderRadius:"10px", border:"1.5px solid rgba(0,0,0,0.12)", background:"transparent", cursor:"pointer", marginLeft:"4px" }}
+                aria-label="Toggle menu">
+                {mobileNavOpen ? <X size={18} color="#1a1a2e" /> : <Menu size={18} color="#1a1a2e" />}
+              </button>
             </div>
           </div>
         </div>
       </header>
+
+      {/* ── Mobile Nav Overlay ── */}
+      {mobileNavOpen && (
+        <div className="mobile-nav">
+          <button onClick={() => setMobileNavOpen(false)} style={{ position:"absolute", top:"20px", right:"24px", display:"flex", alignItems:"center", justifyContent:"center", width:"38px", height:"38px", borderRadius:"10px", border:"1.5px solid rgba(0,0,0,0.12)", background:"transparent", cursor:"pointer" }}>
+            <X size={18} color="#1a1a2e" />
+          </button>
+          <Link href="/shop" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#d97706", textDecoration:"none", letterSpacing:"-0.5px" }}>Shop</Link>
+          <Link href="/services" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#1a1a2e", textDecoration:"none", letterSpacing:"-0.5px" }}>Services</Link>
+          <Link href="/contact" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#1a1a2e", textDecoration:"none", letterSpacing:"-0.5px" }}>Contact</Link>
+          <Link href="/about" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#1a1a2e", textDecoration:"none", letterSpacing:"-0.5px" }}>About</Link>
+          <div style={{ display:"flex", gap:"12px", marginTop:"8px" }}>
+            {!user && (
+              <>
+                <Link href="/auth/signin" onClick={() => setMobileNavOpen(false)} style={{ padding:"11px 24px", fontSize:"14px", fontWeight:600, textDecoration:"none", color:"#374151", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.15)" }}>Sign In</Link>
+                <Link href="/auth/signup" onClick={() => setMobileNavOpen(false)} style={{ padding:"11px 24px", fontSize:"14px", fontWeight:700, textDecoration:"none", color:"#fff", borderRadius:"12px", background:"#d97706" }}>Get Started</Link>
+              </>
+            )}
+            {user && (
+              <button onClick={() => { handleSignOut(); setMobileNavOpen(false); }} style={{ padding:"11px 24px", fontSize:"14px", fontWeight:600, border:"1.5px solid rgba(239,68,68,0.3)", color:"#ef4444", borderRadius:"12px", background:"transparent", cursor:"pointer" }}>Sign Out</button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Main ── */}
       <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"100px 24px 80px" }}>

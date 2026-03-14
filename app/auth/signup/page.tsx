@@ -117,6 +117,7 @@ export default function SignUpPage() {
 
   return (
     <div
+      className="page-wrapper"
       style={{
         minHeight: "100vh",
         background: "#f8f7f4",
@@ -226,16 +227,36 @@ export default function SignUpPage() {
           background: #d97706;
           border-color: #d97706;
         }
+
+        /* ── Mobile responsive ── */
+        @media (max-width: 767px) {
+          .page-wrapper { flex-direction: column !important; }
+          .left-panel { display: none !important; }
+          .right-panel {
+            padding: 36px 20px 48px !important;
+            justify-content: flex-start !important;
+          }
+          .mobile-logo { display: flex !important; }
+          .social-row { flex-direction: column !important; }
+          .social-btn { width: 100% !important; }
+          .form-card { max-width: 100% !important; width: 100% !important; }
+          .name-row { grid-template-columns: 1fr !important; }
+        }
+
+        @media (min-width: 768px) {
+          .left-panel { display: flex !important; }
+          .mobile-logo { display: none !important; }
+        }
       `}</style>
 
       {/* ── Left panel — branding ── */}
       <div
+        className="left-panel"
         style={{
           width: "45%",
           minHeight: "100vh",
           position: "relative",
           overflow: "hidden",
-          display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
@@ -326,6 +347,7 @@ export default function SignUpPage() {
 
       {/* ── Right panel — form ── */}
       <div
+        className="right-panel"
         style={{
           flex: 1,
           display: "flex",
@@ -336,15 +358,17 @@ export default function SignUpPage() {
           overflowY: "auto",
         }}
       >
-        {/* Mobile logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px" }} className="flex lg:hidden">
-          <span style={{ width: "28px", height: "28px", borderRadius: "8px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Triangle size={12} color="#fff" fill="#fff" />
-          </span>
-          <span className="brand" style={{ fontSize: "20px", fontWeight: 800, color: "#1a1a2e" }}>EMEREN</span>
+        {/* Mobile logo — shown only on mobile */}
+        <div className="mobile-logo" style={{ alignItems: "center", gap: "8px", marginBottom: "28px" }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
+            <span style={{ width: "28px", height: "28px", borderRadius: "8px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Triangle size={12} color="#fff" fill="#fff" />
+            </span>
+            <span className="brand" style={{ fontSize: "20px", fontWeight: 800, color: "#1a1a2e" }}>EMEREN</span>
+          </Link>
         </div>
 
-        <div style={{ width: "100%", maxWidth: "440px", animation: "fadeUp .5s ease both" }}>
+        <div className="form-card" style={{ width: "100%", maxWidth: "440px", animation: "fadeUp .5s ease both" }}>
 
           {/* Header */}
           <div style={{ marginBottom: "32px" }}>
@@ -358,7 +382,7 @@ export default function SignUpPage() {
           </div>
 
           {/* Social buttons */}
-          <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
+          <div className="social-row" style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
             <button 
               className="social-btn" 
               onClick={() => handleSocialSignUp('google')}
@@ -403,7 +427,7 @@ export default function SignUpPage() {
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
 
             {/* Name row */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div className="name-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: "6px" }}>First Name</label>
                 <input className="input-field" type="text" name="firstName" placeholder="Juan" value={form.firstName} onChange={handleChange} onFocus={() => setFocused("firstName")} onBlur={() => setFocused(null)} />

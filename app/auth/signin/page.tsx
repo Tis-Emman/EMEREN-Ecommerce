@@ -62,6 +62,7 @@ export default function SignInPage() {
 
   return (
     <div
+      className="page-wrapper"
       style={{
         minHeight: "100vh",
         background: "#f8f7f4",
@@ -171,16 +172,35 @@ export default function SignInPage() {
           border-radius: 14px;
           backdrop-filter: blur(8px);
         }
+
+        /* ── Mobile responsive ── */
+        @media (max-width: 767px) {
+          .page-wrapper { flex-direction: column !important; }
+          .left-panel { display: none !important; }
+          .right-panel {
+            padding: 36px 20px 48px !important;
+            justify-content: flex-start !important;
+          }
+          .mobile-logo { display: flex !important; }
+          .social-row { flex-direction: column !important; }
+          .social-btn { width: 100% !important; }
+          .form-card { max-width: 100% !important; width: 100% !important; }
+        }
+
+        @media (min-width: 768px) {
+          .left-panel { display: flex !important; }
+          .mobile-logo { display: none !important; }
+        }
       `}</style>
 
       {/* ── Left panel — branding ── */}
       <div
+        className="left-panel"
         style={{
           width: "45%",
           minHeight: "100vh",
           position: "relative",
           overflow: "hidden",
-          display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
@@ -215,7 +235,7 @@ export default function SignInPage() {
             Your account. Your comfort.
           </p>
           <h2
-            className="display"
+            className="display panel-headline"
             style={{ fontSize: "clamp(38px, 4.5vw, 56px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1.5px", color: "#1a1a2e", marginBottom: "24px" }}
           >
             Everything you<br />
@@ -250,6 +270,7 @@ export default function SignInPage() {
 
       {/* ── Right panel — form ── */}
       <div
+        className="right-panel"
         style={{
           flex: 1,
           display: "flex",
@@ -260,15 +281,17 @@ export default function SignInPage() {
           overflowY: "auto",
         }}
       >
-        {/* Mobile logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px" }} className="flex lg:hidden">
-          <span style={{ width: "28px", height: "28px", borderRadius: "8px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Triangle size={12} color="#fff" fill="#fff" />
-          </span>
-          <span className="brand" style={{ fontSize: "20px", fontWeight: 800, color: "#1a1a2e" }}>EMEREN</span>
+        {/* Mobile logo — shown only on mobile */}
+        <div className="mobile-logo" style={{ alignItems: "center", gap: "8px", marginBottom: "28px" }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
+            <span style={{ width: "28px", height: "28px", borderRadius: "8px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Triangle size={12} color="#fff" fill="#fff" />
+            </span>
+            <span className="brand" style={{ fontSize: "20px", fontWeight: 800, color: "#1a1a2e" }}>EMEREN</span>
+          </Link>
         </div>
 
-        <div style={{ width: "100%", maxWidth: "420px", animation: "fadeUp .5s ease both" }}>
+        <div className="form-card" style={{ width: "100%", maxWidth: "420px", animation: "fadeUp .5s ease both" }}>
 
           {/* Header */}
           <div style={{ marginBottom: "32px" }}>
@@ -287,7 +310,7 @@ export default function SignInPage() {
           </div>
 
           {/* Social buttons */}
-          <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
+          <div className="social-row" style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
             <button className="social-btn">
               <svg width="16" height="16" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

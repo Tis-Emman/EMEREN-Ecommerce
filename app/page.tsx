@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { ALL_PRODUCTS, BADGE_COLORS } from "@/lib/products";
 
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
@@ -322,10 +323,9 @@ export default function LandingPage() {
               margin: "0 auto",
               padding: "0 24px",
               height: "68px",
-              display: "flex",
+              display: "grid",
+              gridTemplateColumns: "1fr auto 1fr",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: "16px",
             }}
           >
             {/* Logo */}
@@ -357,13 +357,14 @@ export default function LandingPage() {
 
             {/* Nav links — desktop */}
             <nav
-              style={{ display: "flex", alignItems: "center", gap: "28px", flex: 1, justifyContent: "center" }}
+              style={{ display: "flex", alignItems: "center", gap: "28px", justifyContent: "center" }}
               className="hidden md:flex"
             >
               {[
-                { label: "Features", href: "/#features" },
-                { label: "About",    href: "/about" },
+                { label: "Shop",     href: "/shop" },
+                { label: "Services", href: "/services" },
                 { label: "Contact",  href: "/contact" },
+                { label: "About",    href: "/about" },
               ].map(({ label, href }) => (
                 <a
                   key={label}
@@ -376,20 +377,10 @@ export default function LandingPage() {
                   {label}
                 </a>
               ))}
-              <Link href="/shop" className="nav-link"
-                style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-              >Shop</Link>
-              <Link href="/services" className="nav-link"
-                style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-              >Services</Link>
             </nav>
 
             {/* Auth buttons */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
               {user ? (
                 <div style={{ position: "relative" }} ref={userMenuRef}>
                   <button
@@ -481,11 +472,10 @@ export default function LandingPage() {
           >
             <X size={18} color="#1a1a2e" />
           </button>
-          <a href="/#features" onClick={() => setMobileNavOpen(false)}>Features</a>
-          <a href="/about" onClick={() => setMobileNavOpen(false)}>About</a>
+          <a href="/shop" onClick={() => setMobileNavOpen(false)}>Shop</a>
+          <a href="/services" onClick={() => setMobileNavOpen(false)}>Services</a>
           <a href="/contact" onClick={() => setMobileNavOpen(false)}>Contact</a>
-          <Link href="/shop" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Shop</Link>
-          <Link href="/services" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Services</Link>
+          <a href="/about" onClick={() => setMobileNavOpen(false)}>About</a>
           <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
             {!user && (
               <>
@@ -719,66 +709,9 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "16px" }}>
-            {[
-              { name: "AUX 1.0HP Q-Series", brand: "AUX", price: "₱21,500", orig: "₱25,000", btu: "9K BTU", sqm: "~16m²", tag: "Inverter", badge: "Best Seller" },
-              { name: "AUX 1.5HP Q-Series", brand: "AUX", price: "₱26,000", orig: "₱32,000", btu: "12K BTU", sqm: "~22m²", tag: "Inverter", badge: "Featured" },
-              { name: "Daikin 1.5HP", brand: "PolarMax", price: "₱72,000", orig: "₱80,000", btu: "24K BTU", sqm: "~45m²", tag: "Inverter", badge: "Commercial" },
-              { name: "FrostLine VRF 8HP", brand: "FrostLine", price: "₱185,000", orig: "₱210,000", btu: "72K BTU", sqm: "~120m²", tag: "Inverter", badge: "Premium" },
-            ].map((p, i) => (
-              <div key={i} className="product-card" style={{ overflow: "hidden" }}>
-                {/* Image */}
-                <div
-                  style={{ height: "160px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", background: "radial-gradient(ellipse at center, rgba(217,119,6,0.08) 0%, #f8f7f4 70%)" }}
-                >
-                  <span
-                    style={{ position: "absolute", top: "12px", left: "12px", padding: "3px 10px", borderRadius: "6px", background: "#d97706", color: "#fff", fontSize: "10px", fontWeight: 700 }}
-                  >
-                    {p.badge}
-                  </span>
-                  {/* SVG AC unit placeholder */}
-                  <svg width="110" height="72" viewBox="0 0 110 72" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 4px 16px rgba(217,119,6,0.15))" }}>
-                    <rect x="4" y="8" width="102" height="46" rx="8" fill="#fff" stroke="rgba(217,119,6,0.25)" strokeWidth="1.5"/>
-                    <rect x="12" y="16" width="86" height="30" rx="5" fill="#f8f7f4" stroke="rgba(0,0,0,0.07)" strokeWidth="1"/>
-                    <rect x="18" y="22" width="6" height="18" rx="2" fill="rgba(217,119,6,0.25)"/>
-                    <rect x="28" y="22" width="6" height="18" rx="2" fill="rgba(217,119,6,0.18)"/>
-                    <rect x="38" y="22" width="6" height="18" rx="2" fill="rgba(217,119,6,0.12)"/>
-                    <rect x="48" y="22" width="6" height="18" rx="2" fill="rgba(217,119,6,0.08)"/>
-                    <circle cx="85" cy="31" r="7" fill="rgba(217,119,6,0.12)" stroke="rgba(217,119,6,0.3)" strokeWidth="1"/>
-                    <circle cx="85" cy="31" r="3" fill="#d97706" opacity="0.6"/>
-                    <rect x="20" y="58" width="70" height="6" rx="3" fill="rgba(0,0,0,0.06)"/>
-                  </svg>
-                </div>
-                {/* Info */}
-                <div style={{ padding: "16px" }}>
-                  <p style={{ color: "#9ca3af", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{p.brand}</p>
-                  <h3 style={{ color: "#1a1a2e", fontSize: "14px", fontWeight: 700, margin: "0 0 10px", lineHeight: 1.3 }}>{p.name}</h3>
-                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "14px" }}>
-                    {[p.btu, p.sqm, p.tag].map((t) => (
-                      <span
-                        key={t}
-                        style={{ padding: "2px 8px", borderRadius: "5px", fontSize: "11px", color: "#6b7280", background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div>
-                      <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: "18px", fontWeight: 800, color: "#1a1a2e" }}>{p.price}</span>
-                      <span style={{ fontSize: "11px", color: "#d1d5db", textDecoration: "line-through", marginLeft: "6px" }}>{p.orig}</span>
-                    </div>
-                    <Link
-                      href="/shop"
-                      className="cta-btn"
-                      style={{ padding: "7px 14px", fontSize: "12px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}
-                    >
-                      <Plus size={12} />
-                      Add
-                    </Link>
-                  </div>
-                </div>
-              </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "16px" }}>
+            {ALL_PRODUCTS.filter((p) => p.badge).slice(0, 4).map((p) => (
+              <FeaturedProductCard key={p.id} product={p} />
             ))}
           </div>
         </div>
@@ -962,5 +895,86 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+// ── Featured Product Card — matches shop page style exactly ──────────────────
+function FeaturedProductCard({ product: p }: { product: import("@/lib/products").Product }) {
+  const [imgError, setImgError] = useState(false);
+  const lowestPrice = Math.min(...p.variants.map((v) => v.price));
+  const lowestOrig  = p.variants.find((v) => v.price === lowestPrice)?.orig ?? lowestPrice;
+  const discount    = Math.round(((lowestOrig - lowestPrice) / lowestOrig) * 100);
+  const hasInverter = p.variants.some((v) => v.tag === "Inverter");
+
+  return (
+    <Link href={`/shop/${p.id}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+      <div className="product-card" style={{ overflow: "hidden" }}>
+        {/* Image area — identical to shop */}
+        <div style={{ height: "190px", position: "relative", overflow: "hidden", background: "linear-gradient(145deg,#f0ede8 0%,#f8f7f4 50%,#ede9e2 100%)" }}>
+          <div style={{ position: "absolute", top: "-30px", right: "-30px", width: "130px", height: "130px", borderRadius: "50%", background: "rgba(217,119,6,0.06)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: "-20px", left: "-20px", width: "90px", height: "90px", borderRadius: "50%", background: "rgba(217,119,6,0.04)", pointerEvents: "none" }} />
+
+          {!imgError ? (
+            <img
+              src={`/images/products/${p.id}.png`}
+              alt={p.series}
+              onError={() => setImgError(true)}
+              style={{ width: "100%", height: "100%", objectFit: "contain", padding: "20px", display: "block", position: "relative", zIndex: 1, mixBlendMode: "multiply" }}
+            />
+          ) : (
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "6px", zIndex: 1 }}>
+              <svg width="88" height="64" viewBox="0 0 88 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 4px 14px rgba(217,119,6,0.18))" }}>
+                <rect x="4" y="16" width="80" height="36" rx="8" fill="#fff" stroke="rgba(217,119,6,0.25)" strokeWidth="1.5"/>
+                <line x1="14" y1="24" x2="14" y2="44" stroke="rgba(217,119,6,0.2)" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="20" y1="24" x2="20" y2="44" stroke="rgba(217,119,6,0.2)" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="26" y1="24" x2="26" y2="44" stroke="rgba(217,119,6,0.2)" strokeWidth="1.5" strokeLinecap="round"/>
+                <rect x="36" y="22" width="38" height="20" rx="4" fill="rgba(217,119,6,0.07)" stroke="rgba(217,119,6,0.15)" strokeWidth="1"/>
+                <text x="55" y="36" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d97706" fontFamily="Outfit,sans-serif">18°C</text>
+                <circle cx="76" cy="26" r="3" fill="#22c55e" opacity="0.8"/>
+              </svg>
+              <span style={{ fontSize: "10px", color: "#c4b5a0", fontWeight: 600, letterSpacing: "0.03em" }}>{p.type}</span>
+            </div>
+          )}
+
+          {p.badge && (
+            <span style={{ position: "absolute", top: "12px", left: "12px", padding: "2px 8px", borderRadius: "6px", fontSize: "10px", fontWeight: 700, background: BADGE_COLORS[p.badge]?.bg ?? "#d97706", color: BADGE_COLORS[p.badge]?.color ?? "#fff", zIndex: 2 }}>
+              {p.badge}
+            </span>
+          )}
+          {hasInverter && (
+            <span style={{ position: "absolute", top: "12px", right: "12px", padding: "2px 8px", borderRadius: "5px", fontSize: "10px", fontWeight: 600, background: "rgba(34,197,94,0.1)", color: "#16a34a", border: "1px solid rgba(34,197,94,0.25)", zIndex: 2 }}>
+              Inverter
+            </span>
+          )}
+        </div>
+
+        {/* Info */}
+        <div style={{ padding: "16px" }}>
+          <p style={{ color: "#9ca3af", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 2px" }}>{p.brand}</p>
+          <h3 style={{ color: "#1a1a2e", fontSize: "15px", fontWeight: 700, margin: "0 0 10px", lineHeight: 1.3 }}>{p.brand} {p.series}</h3>
+
+          {/* HP pills */}
+          <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "12px" }}>
+            {p.variants.map((v) => (
+              <span key={v.hp} style={{ padding: "3px 9px", borderRadius: "6px", fontSize: "11px", fontWeight: 700, border: "1.5px solid rgba(0,0,0,0.09)", background: "#f8f7f4", color: "#374151" }}>{v.hp}</span>
+            ))}
+          </div>
+
+          {/* Price + discount */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <p style={{ fontSize: "10px", color: "#9ca3af", margin: "0 0 1px" }}>Starting at</p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "5px" }}>
+                <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: "18px", fontWeight: 800, color: "#1a1a2e" }}>₱{lowestPrice.toLocaleString()}</span>
+                <span style={{ fontSize: "11px", color: "#d1d5db", textDecoration: "line-through" }}>₱{lowestOrig.toLocaleString()}</span>
+              </div>
+            </div>
+            <span style={{ padding: "3px 9px", borderRadius: "7px", background: "rgba(239,68,68,0.08)", color: "#ef4444", fontSize: "11px", fontWeight: 700 }}>
+              {discount}% OFF
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }

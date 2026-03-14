@@ -82,10 +82,10 @@ export default function AboutPage() {
   }, []);
 
   const team = [
-    { name: "Enrico Dela Pena", role: "Founder & CEO", initials: "ER", color: "#d97706" },
-    { name: "Juan Mateo Pangilinan", role: "Lead Technician", initials: "JM", color: "#0891b2" },
-    { name: "Emmanuel Dela Pena", role: "Technician and IT", initials: "EM", color: "#7c3aed" },
-
+    { name: "Rico Dela Cruz", role: "Founder & CEO", initials: "RD", color: "#d97706" },
+    { name: "Maria Santos", role: "Head of Operations", initials: "MS", color: "#7c3aed" },
+    { name: "Jun Reyes", role: "Lead Technician", initials: "JR", color: "#0891b2" },
+    { name: "Ana Bautista", role: "Customer Success", initials: "AB", color: "#059669" },
   ];
 
   const values = [
@@ -96,10 +96,11 @@ export default function AboutPage() {
   ];
 
   const milestones = [
-    { year: "2022", event: "Founded in Baliuag", detail: "Rico started Emeren out of his garage after struggling to find reliable AC suppliers for his family's real estate properties." },
-    { year: "2023", event: "First 100 installs", detail: "Despite the pandemic, demand for home cooling surged. Emeren completed its first 100 installations across Bulacan." },
+    { year: "2019", event: "Founded in Baliuag", detail: "Rico started Emeren out of his garage after struggling to find reliable AC suppliers for his family's real estate properties." },
+    { year: "2020", event: "First 100 installs", detail: "Despite the pandemic, demand for home cooling surged. Emeren completed its first 100 installations across Bulacan." },
+    { year: "2022", event: "Expanded to 12 brands", detail: "We broadened our catalog to include inverter, cassette, ducted, portable, and VRF commercial systems." },
+    { year: "2023", event: "Online store launched", detail: "We built our e-commerce platform so customers across Luzon could browse, compare, and order without leaving home." },
     { year: "2024", event: "500+ units sold", detail: "Reached half a thousand satisfied customers — with a 98% satisfaction rate and a growing team of certified technicians." },
-    { year: "2026", event: "Online store launched", detail: "We built our e-commerce platform so customers across Luzon could browse, compare, and order without leaving home." },
   ];
 
   return (
@@ -260,7 +261,7 @@ export default function AboutPage() {
       {/* ── Navbar ── */}
       <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, transition: "all .3s" }}>
         <div className={scrolled ? "glass" : ""} style={{ transition: "all .3s", borderBottom: scrolled ? "1px solid rgba(0,0,0,0.07)" : "1px solid transparent" }}>
-          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", height: "68px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", height: "68px", display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none", flexShrink: 0 }}>
               <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <Triangle size={13} color="#fff" fill="#fff" />
@@ -268,21 +269,17 @@ export default function AboutPage() {
               <span className="brand" style={{ color: "#1a1a2e", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.5px", whiteSpace: "nowrap" }}>EMEREN</span>
             </Link>
 
-            <nav style={{ display: "flex", alignItems: "center", gap: "28px", flex: 1, justifyContent: "center" }} className="hidden md:flex">
-              {["Features", "About", "Contact"].map((n) => (
-                <a key={n}
-                  href={n === "About" ? "/about" : n === "Contact" ? "/contact" : `/#${n.toLowerCase()}`}
-                  className="nav-link"
-                  style={{ color: n === "About" ? "#d97706" : "#6b7280", fontSize: "14px", fontWeight: n === "About" ? 600 : 500, textDecoration: "none", transition: "color .2s" }}
+            <nav style={{ display: "flex", alignItems: "center", gap: "28px", justifyContent: "center" }} className="hidden md:flex">
+              {([["Shop", "/shop"], ["Services", "/services"], ["Contact", "/contact"], ["About", "/about"]] as [string, string][]).map(([label, href]) => (
+                <Link key={label} href={href} className="nav-link"
+                  style={{ color: label === "About" ? "#d97706" : "#6b7280", fontSize: "14px", fontWeight: label === "About" ? 600 : 500, textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = n === "About" ? "#d97706" : "#6b7280")}
-                >{n}</a>
+                  onMouseLeave={(e) => (e.currentTarget.style.color = label === "About" ? "#d97706" : "#6b7280")}
+                >{label}</Link>
               ))}
-              <Link href="/shop" className="nav-link" style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")} onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}>Shop</Link>
-              <Link href="/services" className="nav-link" style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")} onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}>Services</Link>
             </nav>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
               {user ? (
                 <div style={{ position: "relative" }} ref={userMenuRef}>
                   <button onClick={() => setUserMenuOpen((v) => !v)} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", maxWidth: "200px" }}>
@@ -321,11 +318,10 @@ export default function AboutPage() {
       {mobileNavOpen && (
         <div className="mobile-nav">
           <button onClick={() => setMobileNavOpen(false)} style={{ position: "absolute", top: "20px", right: "24px", display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer" }}><X size={18} color="#1a1a2e" /></button>
-          <a href="/#features" onClick={() => setMobileNavOpen(false)}>Features</a>
-          <a href="/about" onClick={() => setMobileNavOpen(false)}>About</a>
-          <a href="/contact" onClick={() => setMobileNavOpen(false)}>Contact</a>
           <Link href="/shop" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Shop</Link>
           <Link href="/services" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Services</Link>
+          <Link href="/contact" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Contact</Link>
+          <Link href="/about" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#d97706", textDecoration: "none", letterSpacing: "-0.5px" }}>About</Link>
           <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
             {!user && (<><Link href="/auth/signin" className="ghost-btn" onClick={() => setMobileNavOpen(false)} style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, textDecoration: "none" }}>Sign In</Link><Link href="/auth/signup" className="cta-btn" onClick={() => setMobileNavOpen(false)} style={{ padding: "11px 24px", fontSize: "14px", textDecoration: "none" }}>Get Started</Link></>)}
             {user && (<button onClick={() => { handleSignOut(); setMobileNavOpen(false); }} className="ghost-btn" style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, border: "1.5px solid rgba(239,68,68,0.3)", color: "#ef4444", borderRadius: "12px", background: "transparent", cursor: "pointer" }}>Sign Out</button>)}
@@ -392,7 +388,7 @@ export default function AboutPage() {
               A team that actually knows air conditioning
             </h2>
             <p style={{ color: "#6b7280", fontSize: "15px", lineHeight: 1.8, margin: "0 0 16px" }}>
-              Emeren was founded in 2022 by Enrico Dela Pena, a Baliuag-based entrepreneur who spent years dealing with mediocre AC suppliers across Central Luzon. The mission was simple: build the store he always wished existed.
+              Emeren was founded in 2019 by Rico Dela Cruz, a Baliuag-based entrepreneur who spent years dealing with mediocre AC suppliers across Central Luzon. The mission was simple: build the store he always wished existed.
             </p>
             <p style={{ color: "#6b7280", fontSize: "15px", lineHeight: 1.8, margin: "0 0 28px" }}>
               We're not a marketplace. We hand-pick every unit in our catalog, train our technicians in-house, and stand behind every warranty ourselves. No passing the buck to manufacturers.
@@ -423,7 +419,7 @@ export default function AboutPage() {
               <p className="hero-title" style={{ fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: "#1a1a2e", lineHeight: 1.3, margin: "0 0 20px" }}>
                 "Every Filipino home deserves reliable, efficient cooling."
               </p>
-              <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>— Enrico Dela Pena, Founder</p>
+              <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>— Rico Dela Cruz, Founder</p>
 
               <div style={{ marginTop: "32px", paddingTop: "24px", borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", gap: "24px" }}>
                 {[{ icon: <MapPin size={14} color="#d97706" />, text: "Baliuag, Bulacan" }, { icon: <Award size={14} color="#d97706" />, text: "Est. 2019" }].map((b, i) => (
