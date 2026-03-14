@@ -286,11 +286,11 @@ export default function ContactPage() {
             </Link>
 
             <nav className="desktop-only" style={{ alignItems: "center", gap: "28px", justifyContent: "center" }}>
-              {([["Shop", "/shop"], ["Services", "/services"], ["Contact", "/contact"], ["About", "/about"]] as [string, string][]).map(([label, href]) => (
+              {([["Shop", "/shop"], ["Services", "/services"], ["Contact Us", "/contact"], ["About Us", "/about"]] as [string, string][]).map(([label, href]) => (
                 <Link key={label} href={href} className="nav-link"
-                  style={{ color: label === "Contact" ? "#d97706" : "#6b7280", fontSize: "14px", fontWeight: label === "Contact" ? 600 : 500, textDecoration: "none", transition: "color .2s" }}
+                  style={{ color: label === "Contact Us" ? "#d97706" : "#6b7280", fontSize: "14px", fontWeight: label === "Contact Us" ? 600 : 500, textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = label === "Contact" ? "#d97706" : "#6b7280")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = label === "Contact Us" ? "#d97706" : "#6b7280")}
                 >{label}</Link>
               ))}
             </nav>
@@ -366,7 +366,7 @@ export default function ContactPage() {
                 { label: "Shop",     href: "/shop",     icon: <ArrowRight size={16} color="#d97706" /> },
                 { label: "Services", href: "/services", icon: <Wrench size={16} color="#d97706" /> },
                 { label: "Contact",  href: "/contact",  icon: <Phone size={16} color="#d97706" /> },
-                { label: "About",    href: "/about",    icon: <MapPin size={16} color="#d97706" /> },
+                { label: "About Us",    href: "/about",    icon: <MapPin size={16} color="#d97706" /> },
               ]).map(({ label, href, icon }) => (
                 <Link key={label} href={href} className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
                   <span className="link-icon">{icon}</span>{label}
@@ -434,21 +434,21 @@ export default function ContactPage() {
             {
               icon: <Phone size={20} color="#d97706" />,
               label: "Call Us",
-              value: "+63 44 123 4567",
+              value: "+63 961 742 8532",
               sub: "Mon – Sat, 8AM – 6PM",
               href: "tel:+63441234567",
             },
             {
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="#d97706"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>,
               label: "Facebook",
-              value: "Emeren Philippines",
+              value: "Emeren Aircon and Refrigeration Services",
               sub: "Message us on Facebook",
               href: "https://facebook.com/emeren.ph",
             },
             {
               icon: <MapPin size={20} color="#d97706" />,
               label: "Visit Us",
-              value: "Baliuag, Bulacan",
+              value: "Sabang, Baliuag, Bulacan",
               sub: "Showroom open daily",
               href: "https://maps.google.com",
             },

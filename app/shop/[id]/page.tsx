@@ -199,7 +199,7 @@ export default function ProductPage() {
 
             {/* Nav links — desktop only */}
             <nav className="desktop-only" style={{ alignItems:"center", gap:"28px", justifyContent:"center" }}>
-              {([["Shop","/shop"],["Services","/services"],["Contact","/contact"],["About","/about"]] as [string,string][]).map(([label,href]) => (
+              {([["Shop","/shop"],["Services","/services"],["Contact Us","/contact"],["About Us","/about"]] as [string,string][]).map(([label,href]) => (
                 <Link key={label} href={href} className="nav-link"
                   style={{ color: label==="Shop" ? "#d97706" : "#6b7280", fontSize:"14px", fontWeight: label==="Shop" ? 600 : 500, textDecoration:"none", transition:"color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color="#1a1a2e")}
@@ -305,8 +305,8 @@ export default function ProductPage() {
               {([
                 { label:"Shop",     href:"/shop",     icon:<Wind size={16} color="#d97706" /> },
                 { label:"Services", href:"/services", icon:<Wrench size={16} color="#d97706" /> },
-                { label:"About",    href:"/about",    icon:<Shield size={16} color="#d97706" /> },
-                { label:"Contact",  href:"/contact",  icon:<Phone size={16} color="#d97706" /> },
+                { label:"About Us",    href:"/about",    icon:<Shield size={16} color="#d97706" /> },
+                { label:"Contact Us",  href:"/contact",  icon:<Phone size={16} color="#d97706" /> },
               ]).map(({ label, href, icon }) => (
                 <Link key={label} href={href} className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
                   <span className="link-icon">{icon}</span>{label}
@@ -535,7 +535,7 @@ export default function ProductPage() {
             <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
               {[
                 { icon:<MapPin size={16} color="#d97706" />, label:"Address",     value:"Emeren AC Solutions\nBaliuag, Bulacan, Philippines" },
-                { icon:<Phone  size={16} color="#d97706" />, label:"Contact",     value:"+63 917 123 4567\ninfo@emerenph.com" },
+                { icon:<Phone  size={16} color="#d97706" />, label:"Contact Us",     value:"+63 917 123 4567\ninfo@emerenph.com" },
                 { icon:<Clock  size={16} color="#d97706" />, label:"Store Hours", value:"Mon – Sat: 8:00 AM – 6:00 PM\nSun: 9:00 AM – 4:00 PM" },
               ].map(({ icon, label, value }) => (
                 <div key={label} style={{ display:"flex", gap:"14px", padding:"14px", background:"#fff", borderRadius:"14px", border:"1px solid rgba(0,0,0,0.07)" }}>
@@ -613,7 +613,7 @@ export default function ProductPage() {
           </div>
           <p style={{ fontSize:"12px", color:"#d1d5db" }}>© 2025 Emeren. All rights reserved.</p>
           <div style={{ display:"flex", gap:"20px" }}>
-            {["Privacy Policy","Terms","Contact"].map((l) => (
+            {["Privacy Policy","Terms","Contact Us"].map((l) => (
               <a key={l} href="#" style={{ fontSize:"12px", color:"#d1d5db", textDecoration:"none", transition:"color .2s" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color="#6b7280")}
                 onMouseLeave={(e) => (e.currentTarget.style.color="#d1d5db")}

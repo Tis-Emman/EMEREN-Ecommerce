@@ -96,11 +96,11 @@ export default function AboutPage() {
   ];
 
   const milestones = [
-    { year: "2019", event: "Founded in Baliuag", detail: "Rico started Emeren out of his garage after struggling to find reliable AC suppliers for his family's real estate properties." },
-    { year: "2020", event: "First 100 installs", detail: "Despite the pandemic, demand for home cooling surged. Emeren completed its first 100 installations across Bulacan." },
-    { year: "2022", event: "Expanded to 12 brands", detail: "We broadened our catalog to include inverter, cassette, ducted, portable, and VRF commercial systems." },
-    { year: "2023", event: "Online store launched", detail: "We built our e-commerce platform so customers across Luzon could browse, compare, and order without leaving home." },
-    { year: "2024", event: "500+ units sold", detail: "Reached half a thousand satisfied customers — with a 98% satisfaction rate and a growing team of certified technicians." },
+    { year: "2022", event: "Founded in Baliuag", detail: "Rico started Emeren out of his garage after struggling to find reliable AC suppliers for his family's real estate properties." },
+    { year: "2024", event: "First 100 installs", detail: "Despite the pandemic, demand for home cooling surged. Emeren completed its first 100 installations across Bulacan." },
+    { year: "2025", event: "500+ units sold", detail: "Reached half a thousand satisfied customers — with a 98% satisfaction rate and a growing team of certified technicians." },
+    { year: "2026", event: "Online store launched", detail: "We built our e-commerce platform so customers across Luzon could browse, compare, and order without leaving home." },
+
   ];
 
   return (
@@ -290,11 +290,11 @@ export default function AboutPage() {
             </Link>
 
             <nav className="desktop-only" style={{ alignItems: "center", gap: "28px", justifyContent: "center" }}>
-              {([["Shop", "/shop"], ["Services", "/services"], ["Contact", "/contact"], ["About", "/about"]] as [string, string][]).map(([label, href]) => (
+              {([["Shop", "/shop"], ["Services", "/services"], ["Contact Us", "/contact"], ["About Us", "/about"]] as [string, string][]).map(([label, href]) => (
                 <Link key={label} href={href} className="nav-link"
-                  style={{ color: label === "About" ? "#d97706" : "#6b7280", fontSize: "14px", fontWeight: label === "About" ? 600 : 500, textDecoration: "none", transition: "color .2s" }}
+                  style={{ color: label === "About Us" ? "#d97706" : "#6b7280", fontSize: "14px", fontWeight: label === "About Us" ? 600 : 500, textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = label === "About" ? "#d97706" : "#6b7280")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = label === "About Us" ? "#d97706" : "#6b7280")}
                 >{label}</Link>
               ))}
             </nav>
@@ -369,7 +369,7 @@ export default function AboutPage() {
               {([
                 { label: "Shop",     href: "/shop",     icon: <ArrowRight size={16} color="#d97706" /> },
                 { label: "Services", href: "/services", icon: <Wrench size={16} color="#d97706" /> },
-                { label: "Contact",  href: "/contact",  icon: <MapPin size={16} color="#d97706" /> },
+                { label: "Contact Us",  href: "/contact",  icon: <MapPin size={16} color="#d97706" /> },
                 { label: "About",    href: "/about",    icon: <Users size={16} color="#d97706" /> },
               ]).map(({ label, href, icon }) => (
                 <Link key={label} href={href} className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
@@ -468,7 +468,7 @@ export default function AboutPage() {
               A team that actually knows air conditioning
             </h2>
             <p style={{ color: "#6b7280", fontSize: "15px", lineHeight: 1.8, margin: "0 0 16px" }}>
-              Emeren was founded in 2019 by Rico Dela Cruz, a Baliuag-based entrepreneur who spent years dealing with mediocre AC suppliers across Central Luzon. The mission was simple: build the store he always wished existed.
+              Emeren was founded in 2022 by Enrico Dela Pena, a Baliuag-based entrepreneur who spent years dealing with mediocre AC suppliers at Saudi Arabia. The mission was simple: build the store he always wished existed.
             </p>
             <p style={{ color: "#6b7280", fontSize: "15px", lineHeight: 1.8, margin: "0 0 28px" }}>
               We're not a marketplace. We hand-pick every unit in our catalog, train our technicians in-house, and stand behind every warranty ourselves. No passing the buck to manufacturers.
@@ -499,7 +499,7 @@ export default function AboutPage() {
               <p className="hero-title" style={{ fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: "#1a1a2e", lineHeight: 1.3, margin: "0 0 20px" }}>
                 "Every Filipino home deserves reliable, efficient cooling."
               </p>
-              <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>— Rico Dela Cruz, Founder</p>
+              <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>— Enrico Dela Pena, Founder</p>
 
               <div style={{ marginTop: "32px", paddingTop: "24px", borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", gap: "24px" }}>
                 {[{ icon: <MapPin size={14} color="#d97706" />, text: "Baliuag, Bulacan" }, { icon: <Award size={14} color="#d97706" />, text: "Est. 2019" }].map((b, i) => (
@@ -536,7 +536,7 @@ export default function AboutPage() {
           <div style={{ textAlign: "center", marginBottom: "56px" }}>
             <p className="section-label" style={{ color: "#d97706", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "12px" }}>How We Got Here</p>
             <h2 className="hero-title" style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1px", margin: 0, color: "#1a1a2e" }}>
-              Five years, one mission
+              Four years, one mission
             </h2>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -648,7 +648,7 @@ export default function AboutPage() {
             </div>
             {[
               { title: "Products", links: [{ label: "Split-Type", href: "/shop?type=split" }, { label: "Cassette", href: "/shop?type=cassette" }, { label: "Ducted", href: "/shop?type=ducted" }, { label: "Portable", href: "/shop?type=portable" }, { label: "Multi-Split", href: "/shop?type=multi-split" }] },
-              { title: "Company", links: [{ label: "About Us", href: "/about" }, { label: "Careers", href: "/careers" }, { label: "Press", href: "/press" }, { label: "Contact", href: "/contact" }] },
+              { title: "Company", links: [{ label: "About Us", href: "/about" }, { label: "Careers", href: "/careers" }, { label: "Press", href: "/press" }, { label: "Contact Us", href: "/contact" }] },
               { title: "Support", links: [{ label: "Installation", href: "/support/installation" }, { label: "Warranty", href: "/support/warranty" }, { label: "Returns", href: "/support/returns" }, { label: "FAQ", href: "/faq" }] },
             ].map((col) => (
               <div key={col.title}>

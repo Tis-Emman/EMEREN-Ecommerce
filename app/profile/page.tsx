@@ -527,7 +527,7 @@ export default function ProfilePage() {
 
             {/* Nav — desktop */}
             <nav style={{ display: "flex", alignItems: "center", gap: "28px", justifyContent: "center" }} className="hidden md:flex">
-              {([["Shop","/shop"],["Services","/services"],["Contact","/contact"],["About","/about"]] as [string,string][]).map(([label,href]) => (
+              {([["Shop","/shop"],["Services","/services"],["Contact","/contact"],["About Us","/about"]] as [string,string][]).map(([label,href]) => (
                 <Link key={label} href={href} className="nav-link"
                   style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
@@ -568,7 +568,7 @@ export default function ProfilePage() {
           <Link href="/shop"     onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit',sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Shop</Link>
           <Link href="/services" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit',sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Services</Link>
           <Link href="/contact"  onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit',sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Contact</Link>
-          <Link href="/about"    onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit',sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>About</Link>
+          <Link href="/about"    onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit',sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>About Us</Link>
           <button onClick={() => { handleSignOut(); setMobileNavOpen(false); }} style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, border: "1.5px solid rgba(239,68,68,0.3)", color: "#ef4444", borderRadius: "12px", background: "transparent", cursor: "pointer" }}>Sign Out</button>
         </div>
       )}

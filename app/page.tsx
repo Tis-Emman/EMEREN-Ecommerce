@@ -454,8 +454,8 @@ export default function LandingPage() {
               {[
                 { label: "Shop",     href: "/shop" },
                 { label: "Services", href: "/services" },
-                { label: "Contact",  href: "/contact" },
-                { label: "About",    href: "/about" },
+                { label: "Contact Us",  href: "/contact" },
+                { label: "About Us",    href: "/about" },
               ].map(({ label, href }) => (
                 <a
                   key={label}
@@ -606,8 +606,8 @@ export default function LandingPage() {
               {[
                 { label: "Shop",     href: "/shop",     icon: <Smartphone size={16} color="#d97706" /> },
                 { label: "Services", href: "/services", icon: <Wrench size={16} color="#d97706" /> },
-                { label: "About",    href: "/about",    icon: <Shield size={16} color="#d97706" /> },
-                { label: "Contact",  href: "/contact",  icon: <MessageCircle size={16} color="#d97706" /> },
+                { label: "About Us",    href: "/about",    icon: <Shield size={16} color="#d97706" /> },
+                { label: "Contact Us",  href: "/contact",  icon: <MessageCircle size={16} color="#d97706" /> },
               ].map(({ label, href, icon }) => (
                 <a
                   key={label}
@@ -743,7 +743,6 @@ export default function LandingPage() {
             style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "24px", marginTop: "52px", animation: "fadeUp 0.7s ease both", animationDelay: "0.45s" }}
           >
             {[
-              { icon: <Truck size={15} color="#d97706" />, text: "Free Delivery Metro Manila" },
               { icon: <Wrench size={15} color="#d97706" />, text: "Professional Installation" },
               { icon: <Shield size={15} color="#d97706" />, text: "2-Year Warranty" },
               { icon: <Zap size={15} color="#d97706" />, text: "Inverter Certified" },
@@ -802,7 +801,6 @@ export default function LandingPage() {
             { num: "500+", label: "Units Sold", sub: "Across Luzon" },
             { num: "12", label: "Top Brands", sub: "Curated selection" },
             { num: "98%", label: "Satisfaction", sub: "Customer rated" },
-            { num: "48hr", label: "Delivery", sub: "Metro Manila" },
           ].map((s, i) => (
             <div
               key={i}
@@ -845,7 +843,6 @@ export default function LandingPage() {
               { icon: <Smartphone size={22} color="#d97706" />, title: "Smart Home Ready", desc: "Wi-Fi enabled units compatible with Google Home, Alexa, and native apps. Control your AC from anywhere." },
               { icon: <Wrench size={22} color="#d97706" />, title: "Pro Installation", desc: "Every purchase includes scheduling with our certified technicians. We handle everything from mounting to gas charging." },
               { icon: <Shield size={22} color="#d97706" />, title: "Warranty Covered", desc: "All units come with a minimum 2-year comprehensive warranty. Extended plans available at checkout." },
-              { icon: <Truck size={22} color="#d97706" />, title: "Fast Delivery", desc: "Same-day dispatch for orders before 12PM. Free delivery within Metro Manila, affordable rates nationwide." },
               { icon: <MessageCircle size={22} color="#d97706" />, title: "Expert Advice", desc: "Not sure which unit fits your room? Our AC specialists are on chat 7 days a week to help you decide." },
             ].map((f, i) => (
               <div key={i} className="feat-card" style={{ padding: "28px" }}>
@@ -1024,7 +1021,7 @@ export default function LandingPage() {
                 { label: "About Us", href: "/about" },
                 { label: "Careers", href: "/careers" },
                 { label: "Press", href: "/press" },
-                { label: "Contact", href: "/contact" },
+                { label: "Contact Us", href: "/contact" },
               ]},
               { title: "Support", links: [
                 { label: "Installation", href: "/support/installation" },

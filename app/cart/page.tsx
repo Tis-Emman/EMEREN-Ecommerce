@@ -267,7 +267,7 @@ export default function CartPage() {
 
             {/* Nav */}
             <nav style={{ display: "flex", alignItems: "center", gap: "32px" }} className="hidden md:flex">
-              {[["Products", "/shop"], ["Features", "/#features"], ["About", "/#about"], ["Contact", "/#contact"]].map(([label, href]) => (
+              {[["Products", "/shop"], ["Features", "/#features"], ["About Us", "/about"], ["Contact Us", "/#contact"]].map(([label, href]) => (
                 <Link key={label} href={href} className="nav-link"
                   style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}

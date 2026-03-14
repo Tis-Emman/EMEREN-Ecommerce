@@ -7,11 +7,58 @@ import {
   Triangle, ArrowRight, Star, ShoppingCart, User, LogOut,
   Check, Phone, MapPin, Clock, Shield, Droplets, Wind,
   ChevronRight, Wrench, CalendarCheck, BadgeCheck, Thermometer,
-  Home, Store, Menu, X,
+  Home, Store, Menu, X, Calendar, CheckCircle, Loader,
 } from "lucide-react";
 import { SERVICES, type Service } from "@/lib/services";
 
 const formatPrice = (n: number) => `₱${n.toLocaleString()}`;
+
+// ── PH Address Data (Pampanga & Bulacan) ──────────────────────────────────────
+const ADDRESS_DATA: Record<string, Record<string, string[]>> = {
+  Pampanga: {
+    "Angeles City": ["Agapito del Rosario","Amsic","Anunas","Balibago","Capaya","Claro M. Recto","Cuayan","Cutcut","Cutud","Lourdes North West","Lourdes Sur","Lourdes Sur East","Malabanias","Margot","Mining","Pampang","Pandan","Pulung Cacutud","Pulung Maragul","Pulung Santol","Salapungan","Sampaloc","San Jose","San Nicolas","Santa Teresita","Santa Trinidad","Santo Cristo","Santo Domingo","Santo Rosario","Sapalibutad","Sapangbato","Tabun","Virgen Delos Remedios"],
+    "City of San Fernando": ["Alasas","Alusiis","Baliti","Bulaon","Calulut","Campo 6","Del Carmen","Del Pilar","Del Rosario","Dela Paz Norte","Dela Paz Sur","Dolores","Juliana","Lara","Lourdes","Magliman","Maimpis","Malino","Malpitic","Pandaras","Panipuan","Pulung Bulu","Quebiauan","Saguin","San Agustin","San Felipe","San Isidro","San Jose","San Juan","San Nicolas","San Pedro","Santa Lucia","Santa Remedios","Santa Rita","Santo Nino","Santo Rosario","Sindalan","Telabastagan"],
+    "Mabalacat City": ["Atlu-Bola","Bical","Bundagul","Cacutud","Calumpang","Camachiles","Dapdap","Dau","Dolores","Duquit","Lakandula","Mabiga","Macapagal","Mamatitang","Mangalit","Marcos Village","Mawaque","Paralayunan","Poblacion","San Francisco","San Joaquin","Santa Ines","Santa Maria","Santo Rosario","Sapang Balen","Sapang Biabas","Tabun"],
+    "Apalit": ["Balucuc","Calantipe","Cansinala","Capalangan","Colgante","Paligui","Sampaloc","San Juan","San Vicente","Sucad","Sulipan","Tabuyuc"],
+    "Arayat": ["Arenas","Baliti","Batasan","Buensuceso","Candating","Cupang","Gatiawin","Guemasan","La Paz","Lacquios","Mangga-Cacutud","Mapalad","Matamo","Panlinlang","Paralaya","Planas","Poblacion","Pulungmasle","Sulipan","Umpungan","Veinte Reales"],
+    "Bacolor": ["Balas","Cabalantian","Cabambangan","Cabetican","Calibutbut","Concepcion","Dolores","Duat","Macabacle","Magliman","Maliwalu","Mesalipit","Parulog","Potrero","San Antonio","San Isidro","San Vicente","Santa Barbara","Santa Ines","Talba","Tinajero"],
+    "Candaba": ["Bahay Pare","Bambang","Barit","Buas","Cuayang Bugtong","Dalayap","Dulong Ilog","Gulap","Lanang","Lourdes","Magumbali","Mandasig","Mandili","Mangga","Mapaniqui","Paligui","Paralaya","Pasig","Pescadores","Pulong Gubat","Pulong Palazan","Salapungan","San Agustin","San Ildefonso","San Jose Matulid","San Juan","San Pedro","San Rafael","San Roque","San Vicente","Santa Cruz","Santa Monica","Santa Rita","Santo Cristo","Santo Nino","Tagulod","Talang","Telapayong","Villa Aglipay"],
+    "Floridablanca": ["Anon","Apalit","Basa Air Base","Benedicto","Bodega","Cabangcalan","Calantas","Carmencita","Consuelo","Dampe","Del Carmen","Fortuna","Gutad","Mabical","Maligaya","Nabuclod","Pabanlag","Paguiruan","Palmayo","Pandaguirig","Poblacion","San Antonio","San Isidro","San Jose","San Nicolas","San Pedro","San Ramon","San Roque","Santa Cruz","Santa Monica","Santa Rita","Santo Rosario","Solib","Valdez"],
+    "Guagua": ["Ascomo","Bancal","Dela Cruz","Gatbus","Imas","Maquiapo","Natividad","Pulungbulu","Quebiauan","San Agustin","San Isidro","San Juan","San Matias","San Miguel","San Nicolas","San Pablo","San Pedro","San Rafael","San Roque","San Vicente","Santa Filomena","Santa Ines","Santa Rita","Santo Cristo","Sibol","Suclayin","Tikyon","Tuburan"],
+    "Porac": ["Babo Pangulo","Babo Sacan","Balubad","Banban","Cangatba","Diaz","Dolores","Jalung","Mancatian","Manibaug Libutad","Manibaug Pasig","Manibaug Paralaya","Mangalit","Mitla Proper","Palat","Pias","Pio","Planas","Poblacion","Pulong Santol","Salu","San Jose Mitla","Santa Cruz","Sapang Uwak","Sepung Calzada","Sinura","Tigig"],
+    "Magalang": ["Abacan","Ayala","Balaug","Bucanan","Camias","Dolores","Escaler","La Paz","Navaling","San Agustin","San Antonio","San Francisco","San Ildefonso","San Isidro","San Jose","San Miguel","San Nicolas 1st","San Nicolas 2nd","San Pablo","San Pedro","San Roque","San Vicente","Santa Cruz","Santa Lucia","Santa Maria","Santo Nino","Santo Rosario","Turu"],
+    "Mexico": ["Acli","Anao","Arayat","Balas","Belen","Brgy. 1 (Pob.)","Brgy. 2 (Pob.)","Brgy. 3 (Pob.)","Brgy. 4 (Pob.)","Brgy. 5 (Pob.)","Brgy. 6 (Pob.)","Brgy. 7 (Pob.)","Brgy. 8 (Pob.)","Camuning","Cawayan","Concepcion","Culiat","De La Paz","Dolores","Eden","Gandus","Lagundi","Laput","Laug","Masamat","Masangsang","Nueva Victoria","Pandacaqui","Pangatlan","Panipuan","Parian","Sabanilla","San Antonio","San Carlos","San Jose","San Juan","San Lorenzo","San Miguel","San Nicolas","San Pablo","San Patricio","San Rafael","San Roque","Santa Cruz","Santa Maria","Santa Rita","Santo Cristo","Santo Rosario","Sapang Maisac","Suclaban","Tangle"],
+    "Santa Ana": ["Mitla","Pampang","Paralaya","Poblacion","San Agustin","San Carlos","San Isidro","San Juan","San Nicolas","San Pablo","San Pedro","Santa Cruz","Santa Lucia","Santa Rita","Santo Tomas","Saplad","Villa Dolores"],
+    "Santa Rita": ["Becuran","Dila-dila","San Agustin","San Basilio","San Isidro","San Jose","San Juan","San Matias","San Vicente","Santa Monica","Santo Cristo"],
+    "Santo Tomas": ["Moras de la Paz","Poblacion","San Bartolome","San Matias","San Vicente","Santa Cruz","Santa Lucia","Santa Maria","Santo Rosario"],
+    "Sasmuan": ["Batang 1st","Batang 2nd","Malusac","Sabitanan","San Antonio","San Nicolas","San Pedro","Santa Lucia","Santa Monica","Santo Tomas","Sebitanan"],
+  },
+  Bulacan: {
+    "City of Malolos": ["Anilao","Atlag","Babatnin","Bagna","Bagong Bayan","Balayong","Balite","Bangkal","Barihan","Bulihan","Bungahan","Caingin","Calero","Caliligawan","Canalate","Caniogan","Catmon","City Proper","Cofradia","Dakila","Guinhawa","Ligas","Liyang","Longos","Look 1st","Look 2nd","Lugam","Mabolo","Mainit","Malimba","Mambog","Masile","Matimbo","Mojon","Namayan","Niugan","Pamarawan","Panasahan","Pinagbakahan","San Agustin","San Gabriel","San Juan","San Pablo","San Vicente","Santiago","Santo Cristo","Santo Nino","Santo Rosario","Santol","Sumapang Bata","Sumapang Matanda","Taal","Tikay"],
+    "City of Meycauayan": ["Bagbaguin","Bahay Pare","Bancal","Banga","Bayugo","Caingin","Calvario","Camalig","Gasak","Hulo","Iba","Langka","Lawa","Libtong","Liputan","Longos","Malhacan","Pajo","Pantoc","Perez","Poblacion","Saluysoy","San Francisco","San Jose","San Roque","Santa Cruz","Santo Cristo","Tugatog","Ubihan","Whangdao"],
+    "City of San Jose del Monte": ["Assumption","Bagong Buhay","Bagong Buhay II","Bagong Buhay III","Citrus","Ciudad Real","Dulong Bayan","Fatima","Fatima II","Fatima III","Fatima IV","Fatima V","Francisco Homes-Guijo","Francisco Homes-Mulawin","Francisco Homes-Narra","Francisco Homes-Yakal","Gaya-Gaya","Graceville","Gumaoc Central","Gumaoc East","Gumaoc West","Kaybanban","Kaypian","Langkiwa","Lanzones","Maharlika","Minuyan","Minuyan II","Minuyan III","Minuyan IV","Minuyan V","Mulawin","Paradise III","Poblacion","San Isidro","San Manuel","San Martin","San Martin II","San Martin III","San Martin IV","San Pedro","San Rafael","Santa Cruz","Santa Cruz II","Santa Cruz III","Santa Cruz IV","Santa Cruz V","Santo Cristo","Santo Nino","Santo Nino II","Santo Nino III","Sapang Palay","St. Martin de Porres","Tungkong Mangga"],
+    "Angat": ["Banaban","Baybay","Binagbag","Donacion","Encanto","Goldap","Hilltop","Ibayo","Kapalangan","Lawa","Lestonac","Lico","Marungko","Nilig","Paltok","Pulong Yantok","San Roque","Santa Cruz","Santa Lucia","Santiago","Santo Cristo","Sapang Bulak","Taboc","Talacsan","Tibag","Tilapayong","Tumana"],
+    "Balagtas": ["Borol 1st","Borol 2nd","Dalig","Longos","Panginay","Pulong Sapat","Santol","Wawa"],
+    "Baliuag": ["Bagong Nayon","Balagtas","Balete","Balubad","Bambang","Batia","Burol","Catulinan","Concepcion","Hinukay","Maasim","Mabalas-Balas","Maguinao","Malamig","Manga","Matangtubig","Pagala","Paitan","Piel","Pinagbarilan","Poblacion","Sabang","Sampaga","San Jose","San Roque","Santelmo","Subic","Sulivan","Tangos","Tarcan","Tiaong","Tibag","Tilapayong","Virgen delas Flores"],
+    "Bocaue": ["Batia","Binagbag","Bolacan","Bundukan","Bunlo","Caingin","Capitangan","Igulot","Lolomboy","Poblacion","Pulong Yantok","Sulucan","Taal","Tiaong","Wakas","Wawa"],
+    "Bulacan": ["Balagtas","Balubad","Bambang","Bitotolino","Calvario","Catmon","Matungao","Maysantol","Perez","Pitpitan","San Francisco","San Isidro","San Jose","San Nicolas","San Pascual","Santa Ana","Santa Ines","Santa Maria","Santo Cristo","Taliptip","Tibig"],
+    "Bustos": ["Banga","Bintog","Calantipay","Calapan","Camachile","Cambaog","Catacte","Liciada","Malamig","Malawak","Poblacion","San Jose","Talacsan","Tanawan","Tibaguin"],
+    "Calumpit": ["Balungao","Calizon","Corazon","Frances","Gatbuca","Iba East","Iba West","Longos","Meysulao","Meyto","Palimbang","Panducot","Pinalagdan","Poblacion","Pungo","San Jose","San Marcos","San Pedro","San Rafael","Santa Lucia","Santa Maria","Sapang Bayan","Wakas"],
+    "Guiguinto": ["Cutcut","Daungan","Genesis","Holy Spirit","Hulong Duhat","Ilang-Ilang","Malis","Panginay","Perez","Poblacion","Pritil","Pulong Sapat","Santa Cruz","Santo Cristo","Tabang","Tiaong","Tibagin","Tuktukan"],
+    "Hagonoy": ["Iba","Isla","Mambog","Mercado","Palapat","Panal","Pinalagdan","Poblacion","Sagrada Familia","San Agustin","San Isidro","San Jose","San Juan","San Pablo","San Pedro","San Roque","San Sebastian","Santa Cruz","Santa Elena","Santo Nino","Santo Tomas","Tampok","Tibaguin","Tipo"],
+    "Marilao": ["Abangan Norte","Abangan Sur","Bahay Pare","Catmon","Ibayo","Lias","Lico","Nagbalon","Patubig","Poblacion I","Poblacion II","Saog","Tabing Ilog","Wawa"],
+    "Norzagaray": ["Bangkal","Bigte","Friendship","Matictic","Minuyan","Partida","Pinagtulayan","Poblacion","San Mateo","Tigbe"],
+    "Obando": ["Binuangan","Catanghalan","Hulo","Lawa","Pamarawan","Panghulo","Pariahan","Payanas","Salambao","San Pascual","Tawiran","Wakas"],
+    "Pandi": ["Bagbaguin","Baka-Bakahan","Bunsuran I","Bunsuran II","Bunsuran III","Cacarong Bata","Cacarong Matanda","Cupang","Maligue","Mapulang Lupa","Masagana","Masagana II","Matiktik","Manatal","Pansol","Pantubig","Pasong Kalabaw","Pasong Bangkal","Pugad","San Roque","San Vicente","Santa Cruz","Santo Cristo","Santo Nino","Santo Nino II","Siling Bata","Siling Matanda"],
+    "Paombong": ["Binakayan","Capitangan","Entablado","Gosok","Iba","Masukol","Mataas na Lupa","Pag-Asa","Poblacion","San Isidro","San Jose","San Roque","Santa Cruz","Santissima Trinidad","Santo Nino","Santo Tomas","Tibig","Wawa"],
+    "Plaridel": ["Agnaya","Bagong Silang","Banga I","Banga II","Bintog","Bulihan","Caingin","Corazon","Culianin","Dampol","Dungan","Gatbuca","Guinhawa","Liciada","Llano","Loma","Longos","Lumang Bayan","Parulan","Poblacion","Rueda","San Jose","Santa Ines","Santa Maria","Santo Cristo","Sembrano","Tikay","Tinajero","Tolson","Wawa","Yabut"],
+    "Pulilan": ["Balatong A","Balatong B","Cutcot","Dampol 1st","Dampol 2nd A","Dampol 2nd B","Dulong Malabon","Inaon","Longos","Lumbac","Lumbang","Mapaniqui","Parulan","Pepipis","Poblacion","Sacdalan","Sapang Bulak","Silangan","Sipat","Tabang"],
+    "San Ildefonso": ["Akle","Alagao","Anyatam","Bagong Bayan","Bakal","Balete","Banga","Baro","Biak-na-Bato","Bigaa","Bunag","Burnay","Buwaya","Cabanon","Camias","Carino","Dita","Engkanto","Floridablanca","Gitna","Gubat","Ilog-Bulo","Imelda","Lambakin","Lias","Lico","Liwanag","Loma","Longos","Lukutan","Lumebia","Macabacle","Mahabang Parang","Maharlika","Maligaya","Malubak","Manatal","Mandile","Manggang-Kahoy","Mapagal","Mapalad","Matictic","Minuyan","Mirasol","Mundang","Muzon","Nagbalon","Niugan","Pabilao","Parulan","Pita","Poblacion","Pulong Bayabas","Pungo","Sacdalan","San Agustin","San Isidro","San Jose","San Juan","San Lucas","San Roque","San Vicente","Santa Cruz","Santa Ines","Santa Lucia","Santa Maria","Santo Cristo","Santo Nino","Santo Tomas","Sapang","Sumaging","Taboc","Talbak","Talacsan","Tanawan","Tibagan","Tibig","Tigbe","Tikling","Tinajero","Wawa"],
+    "San Miguel": ["Alagao","Anyatam","Balaong","Balite","Bantog","Bardias","Baritan","Batong Malake","Biak-na-Bato","Biclat","Buga","Bulihan","Buliran 1st","Buliran 2nd","Camias","Candelaria","Canonical","Carino","Casing","Cawayan","Corazon","Dampol","De La Paz","Encanto","Figaro","Guiguinto","Ilang-Ilang","Ilog Bulo","Isip","King Kabayo","Labne","Lagundi","Lagusnilad","Lico","Ligas","Longos","Loy Norte","Loy Sur","Macamot","Maligaya","Mangga","Manzona","Masalisi","Matubog","Maysantol","Mirabel","Muzon","Niugan","Padre Roman","Paliwas","Paltok","Panaban","Pandayan","Paniniuan","Pariahan","Patubig","Pinagbarilan","Poblacion","Pulong Bayabas","Sacdalan","Salangan","San Agustin","San Isidro","San Jose","San Juan","San Pablo","San Pedro","San Roque","Santa Cruz","Santa Ines","Santa Isabel","Santa Maria","Santo Cristo","Santo Nino","Santo Tomas","Sapang Bato","Sapang Buho","Sapang Putik","Sapang Uwak","Sibul","Siclong","Taal","Talacsan","Tandang Sora","Tartaro","Tibag","Tilapayong","Tinajero","Ubihan","Uling","Wawa"],
+    "San Rafael": ["Banca-Banca","Caingin","Capihan","Coral na Munti","Dila","Diliman I","Diliman II","Magmarale","Mandile","Marungko","Niugan","Paco","Parulan","Poblacion","Pugad Lawin","Pulong Bayabas","San Isidro","San Jose","Sapang Palay"],
+    "Santa Maria": ["Balasing","Buenavista","Bulac","Camangyanan","Catmon","Caysio","Guyong","Lalakhan","Mag-Asawang Sapa","Malamig","Manggahan","Nagbalon","Parada","Pulong Buhangin","Pulong Yantok","Sampaloc","San Gabriel","San Jose Patag","Santa Clara","Santo Cristo","Santo Nino","Silangan","Tumana"],
+  },
+};
 
 // ── SVG Icons ────────────────────────────────────────────────────────────────
 function WindowACIcon() {
@@ -183,10 +230,509 @@ function LocationBadge({ location }: { location: Service["location"] }) {
   );
 }
 
+// ── Custom Calendar Picker ────────────────────────────────────────────────────
+function CalendarPicker({ value, onChange, hasError }: { value: string; onChange: (d: string) => void; hasError: boolean }) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [viewYear,  setViewYear]  = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+
+  const selectedDate = value ? new Date(value + "T00:00:00") : null;
+
+  const DAYS   = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  const firstDay  = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1); }
+    else setViewMonth((m) => m - 1);
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1); }
+    else setViewMonth((m) => m + 1);
+  };
+
+  const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const isPast = (day: number) => new Date(viewYear, viewMonth, day) < today;
+  const isSelected = (day: number) => {
+    if (!selectedDate) return false;
+    return selectedDate.getFullYear() === viewYear && selectedDate.getMonth() === viewMonth && selectedDate.getDate() === day;
+  };
+  const isToday = (day: number) => today.getFullYear() === viewYear && today.getMonth() === viewMonth && today.getDate() === day;
+
+  const select = (day: number) => {
+    if (isPast(day)) return;
+    const mm = String(viewMonth + 1).padStart(2, "0");
+    const dd = String(day).padStart(2, "0");
+    onChange(`${viewYear}-${mm}-${dd}`);
+  };
+
+  const displayValue = selectedDate
+    ? selectedDate.toLocaleDateString("en-PH", { weekday: "short", month: "long", day: "numeric", year: "numeric" })
+    : "";
+
+  return (
+    <div style={{ border: hasError ? "1.5px solid #ef4444" : "1.5px solid rgba(0,0,0,0.12)", borderRadius: "14px", overflow: "hidden", background: "#fff" }}>
+      {/* Selected date display */}
+      <div style={{ padding: "10px 14px", background: selectedDate ? "rgba(217,119,6,0.05)" : "#fafaf9", borderBottom: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", gap: "8px" }}>
+        <Calendar size={14} color={selectedDate ? "#d97706" : "#9ca3af"} />
+        <span style={{ fontSize: "13px", fontWeight: selectedDate ? 700 : 400, color: selectedDate ? "#1a1a2e" : "#9ca3af", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          {displayValue || "Select a date"}
+        </span>
+      </div>
+
+      {/* Month nav */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px 8px" }}>
+        <button onClick={prevMonth} type="button"
+          style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1px solid rgba(0,0,0,0.08)", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "background .15s" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+        <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: "14px", fontWeight: 700, color: "#1a1a2e", letterSpacing: "-0.2px" }}>
+          {MONTHS[viewMonth]} {viewYear}
+        </span>
+        <button onClick={nextMonth} type="button"
+          style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1px solid rgba(0,0,0,0.08)", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "background .15s" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2L8.5 6L4.5 10" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+      </div>
+
+      {/* Day headers */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", padding: "0 10px 4px" }}>
+        {DAYS.map((d) => (
+          <div key={d} style={{ textAlign: "center", fontSize: "11px", fontWeight: 700, color: "#9ca3af", padding: "4px 0", fontFamily: "'Plus Jakarta Sans',sans-serif", letterSpacing: "0.03em" }}>{d}</div>
+        ))}
+      </div>
+
+      {/* Day grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", padding: "0 10px 12px", gap: "2px" }}>
+        {cells.map((day, i) => {
+          if (!day) return <div key={i} />;
+          const past     = isPast(day);
+          const selected = isSelected(day);
+          const todayDay = isToday(day);
+          return (
+            <button key={i} type="button" onClick={() => select(day)} disabled={past}
+              style={{
+                width: "100%", aspectRatio: "1", borderRadius: "8px", border: selected ? "none" : todayDay ? "1.5px solid rgba(217,119,6,0.4)" : "none",
+                background: selected ? "#d97706" : "transparent",
+                color: selected ? "#fff" : past ? "#d1d5db" : todayDay ? "#d97706" : "#1a1a2e",
+                fontSize: "13px", fontWeight: selected || todayDay ? 700 : 400,
+                cursor: past ? "not-allowed" : "pointer",
+                fontFamily: "'Plus Jakarta Sans',sans-serif",
+                transition: "background .12s, color .12s",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+              onMouseEnter={(e) => { if (!past && !selected) { e.currentTarget.style.background = "rgba(217,119,6,0.08)"; e.currentTarget.style.color = "#d97706"; } }}
+              onMouseLeave={(e) => { if (!past && !selected) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = todayDay ? "#d97706" : "#1a1a2e"; } }}
+            >
+              {day}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+function BookingModal({
+  service, onClose, user,
+}: {
+  service: { name: string; price: string } | null;
+  onClose: () => void;
+  user: { email: string } | null;
+}) {
+  const [step, setStep]       = useState<"form" | "success">("form");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors]   = useState<Record<string, string>>({});
+
+  const [form, setForm] = useState({
+    name: "", phone: "",
+    street: "", province: "", municipality: "", barangay: "",
+    date: "", time: "", notes: "",
+  });
+
+  // Fetch full name from profiles table when user is logged in
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const meta = data.user.user_metadata ?? {};
+      type ProfileRow = { full_name: string | null };
+      const { data: profileRow } = await (supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", data.user.id)
+        .single() as unknown as Promise<{ data: ProfileRow | null; error: unknown }>);
+      const fullName = profileRow?.full_name ?? meta.full_name ?? meta.name ?? "";
+      if (fullName) setForm((f) => ({ ...f, name: fullName }));
+    });
+  }, [user]);
+
+  useEffect(() => {
+    if (service) {
+      setStep("form");
+      setErrors({});
+      setForm((f) => ({ ...f, street: "", province: "", municipality: "", barangay: "", date: "", time: "", notes: "" }));
+    }
+  }, [service]);
+
+  if (!service) return null;
+
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setForm((f) => ({ ...f, [key]: e.target.value }));
+    setErrors((er) => ({ ...er, [key]: "" }));
+  };
+
+  const focusStyle  = (e: React.FocusEvent<HTMLElement>) => { (e.currentTarget as HTMLElement).style.borderColor = "#d97706"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(217,119,6,0.1)"; };
+  const blurStyle   = (key: string) => (e: React.FocusEvent<HTMLElement>) => { (e.currentTarget as HTMLElement).style.borderColor = errors[key] ? "#ef4444" : "rgba(0,0,0,0.12)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; };
+  const inputStyle  = (key: string) => ({ padding: "10px 14px", borderRadius: "10px", border: errors[key] ? "1.5px solid #ef4444" : "1.5px solid rgba(0,0,0,0.12)", fontSize: "14px", color: "#1a1a2e", fontFamily: "'Plus Jakarta Sans',sans-serif", outline: "none", background: "#fff", width: "100%", boxSizing: "border-box" as const });
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!form.name.trim())         e.name         = "Name is required";
+    if (!form.phone.trim()) {
+      e.phone = "Contact number is required";
+    } else {
+      const digits = form.phone.replace(/\D/g, "");
+      if (digits.length !== 11 || !digits.startsWith("09")) e.phone = "Enter a valid PH number (09XX XXX XXXX)";
+    }
+    if (!form.street.trim())       e.street       = "Street / house no. is required";
+    if (!form.province)            e.province     = "Select a province";
+    if (!form.municipality)        e.municipality = "Select a municipality";
+    if (!form.barangay)            e.barangay     = "Select a barangay";
+    if (!form.date)                e.date         = "Please pick a date";
+    if (!form.time)                e.time         = "Please pick a time";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const { error } = await (supabase.from("bookings") as any).insert({
+        service_name:   service.name,
+        service_price:  service.price,
+        customer_name:  form.name,
+        phone:          form.phone,
+        street:         form.street,
+        province:       form.province,
+        municipality:   form.municipality,
+        barangay:       form.barangay,
+        address:        `${form.street}, ${form.barangay}, ${form.municipality}, ${form.province}`,
+        preferred_date: form.date,
+        preferred_time: form.time,
+        notes:          form.notes || null,
+        user_email:     user?.email || null,
+        status:         "pending",
+        created_at:     new Date().toISOString(),
+      });
+      if (error) throw error;
+      setStep("success");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)", zIndex: 200, animation: "fadeIn .2s ease both" }} />
+
+      {/* Modal */}
+      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 201, width: "min(520px, calc(100vw - 32px))", maxHeight: "90vh", overflowY: "auto", background: "#fff", borderRadius: "24px", boxShadow: "0 24px 80px rgba(0,0,0,0.2)", animation: "popIn .25s cubic-bezier(.22,1,.36,1) both" }}>
+
+        {step === "success" ? (
+          /* ── Success ── */
+          <div style={{ padding: "48px 32px", textAlign: "center" }}>
+            <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "rgba(34,197,94,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <CheckCircle size={32} color="#22c55e" />
+            </div>
+            <h3 className="outfit" style={{ fontSize: "22px", fontWeight: 900, color: "#1a1a2e", margin: "0 0 8px", letterSpacing: "-0.5px" }}>Booking Received!</h3>
+            <p style={{ fontSize: "14px", color: "#6b7280", lineHeight: 1.6, margin: "0 0 8px" }}>
+              We've received your booking for <strong style={{ color: "#1a1a2e" }}>{service.name}</strong>.
+            </p>
+            <p style={{ fontSize: "13px", color: "#9ca3af", margin: "0 0 28px", lineHeight: 1.6 }}>
+              Our team will confirm your schedule via call or message within 24 hours.
+            </p>
+            <button onClick={onClose} style={{ padding: "12px 32px", borderRadius: "12px", background: "#d97706", color: "#fff", fontSize: "14px", fontWeight: 700, border: "none", cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", boxShadow: "0 4px 14px rgba(217,119,6,0.35)" }}>
+              Done
+            </button>
+          </div>
+        ) : (
+          /* ── Form ── */
+          <>
+            {/* Header */}
+            <div style={{ padding: "24px 28px 20px", borderBottom: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+              <div>
+                <p style={{ fontSize: "11px", fontWeight: 700, color: "#d97706", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 4px" }}>Book a Service</p>
+                <h3 className="outfit" style={{ fontSize: "20px", fontWeight: 900, color: "#1a1a2e", margin: 0, letterSpacing: "-0.4px" }}>{service.name}</h3>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "6px", padding: "3px 10px", borderRadius: "100px", background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.2)" }}>
+                  <span style={{ fontSize: "13px", fontWeight: 800, color: "#d97706", fontFamily: "'Outfit',sans-serif" }}>{service.price}</span>
+                </div>
+              </div>
+              <button onClick={onClose} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.1)", background: "transparent", cursor: "pointer", flexShrink: 0 }}>
+                <X size={16} color="#6b7280" />
+              </button>
+            </div>
+
+            {/* Logged-in banner */}
+            {user ? (
+              <div style={{ margin: "16px 28px 0", padding: "10px 14px", borderRadius: "10px", background: "rgba(217,119,6,0.06)", border: "1px solid rgba(217,119,6,0.15)", display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <User size={13} color="#fff" />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 600, margin: 0 }}>Booking as</p>
+                  <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</p>
+                </div>
+              </div>
+            ) : (
+              <div style={{ margin: "16px 28px 0", padding: "10px 14px", borderRadius: "10px", background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
+                <p style={{ fontSize: "13px", color: "#6b7280", margin: 0 }}>
+                  <Link href="/auth/signin" style={{ color: "#d97706", fontWeight: 700, textDecoration: "none" }}>Sign in</Link>
+                  {" "}to auto-fill your details or continue as guest.
+                </p>
+              </div>
+            )}
+
+            {/* Form body */}
+            <div style={{ padding: "20px 28px", display: "flex", flexDirection: "column", gap: "14px" }}>
+
+              {/* Name */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em" }}>Full Name</label>
+                <input type="text" value={form.name} onChange={set("name")} placeholder="e.g. Juan Dela Cruz"
+                  style={inputStyle("name")} onFocus={focusStyle} onBlur={blurStyle("name")} />
+                {errors.name && <span style={{ fontSize: "11px", color: "#ef4444", fontWeight: 500 }}>{errors.name}</span>}
+              </div>
+
+              {/* Phone */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em" }}>Contact Number</label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => {
+                      let raw = e.target.value.replace(/[^\d+]/g, "");
+                      if (raw.startsWith("+639")) raw = "09" + raw.slice(4);
+                      if (raw.startsWith("639"))  raw = "09" + raw.slice(3);
+                      if (raw.length > 11) raw = raw.slice(0, 11);
+                      let fmt = raw;
+                      if (raw.length > 7)      fmt = raw.slice(0,4) + " " + raw.slice(4,7) + " " + raw.slice(7);
+                      else if (raw.length > 4) fmt = raw.slice(0,4) + " " + raw.slice(4);
+                      setForm((f) => ({ ...f, phone: fmt }));
+                      setErrors((er) => ({ ...er, phone: "" }));
+                    }}
+                    placeholder="09XX XXX XXXX"
+                    maxLength={13}
+                    style={{ ...inputStyle("phone"), paddingRight: "90px" }}
+                    onFocus={focusStyle}
+                    onBlur={blurStyle("phone")}
+                  />
+                  {(() => {
+                    const d = form.phone.replace(/\D/g, "");
+                    const p = d.slice(0, 4);
+                    const globe = ["0817","0904","0905","0906","0915","0916","0917","0926","0927","0935","0936","0937","0945","0953","0954","0955","0956","0965","0966","0967","0975","0976","0977","0978","0979","0995","0996","0997"];
+                    const smart = ["0907","0908","0909","0910","0911","0912","0913","0914","0918","0919","0920","0921","0928","0929","0930","0938","0939","0940","0946","0947","0948","0949","0950","0951","0961","0998","0999"];
+                    const dito  = ["0895","0896","0897","0898","0991","0992","0993","0994"];
+                    const isG = globe.includes(p), isS = smart.includes(p), isD = dito.includes(p);
+                    if (!isG && !isS && !isD) return null;
+                    return (
+                      <span style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "11px", fontWeight: 700, padding: "3px 8px", borderRadius: "6px", background: isG ? "rgba(59,130,246,0.1)" : isS ? "rgba(239,68,68,0.08)" : "rgba(217,119,6,0.1)", color: isG ? "#1d4ed8" : isS ? "#dc2626" : "#d97706" }}>
+                        {isG ? "Globe" : isS ? "Smart" : "DITO"}
+                      </span>
+                    );
+                  })()}
+                </div>
+                {form.phone && (() => {
+                  const d = form.phone.replace(/\D/g, "");
+                  if (d.length === 11 && d.startsWith("09")) return (
+                    <span style={{ fontSize: "11px", color: "#16a34a", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
+                      <Check size={11} strokeWidth={3} /> Valid PH number
+                    </span>
+                  );
+                  if (d.length > 0 && d.length < 11) return (
+                    <span style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 500 }}>
+                      {11 - d.length} more digit{11 - d.length !== 1 ? "s" : ""} needed
+                    </span>
+                  );
+                  return null;
+                })()}
+                {errors.phone && <span style={{ fontSize: "11px", color: "#ef4444", fontWeight: 500 }}>{errors.phone}</span>}
+              </div>
+
+              {/* Address — cascading */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em" }}>Address</label>
+
+                {/* Street */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <input type="text" value={form.street} onChange={set("street")} placeholder="House No. / Street / Subdivision"
+                    style={inputStyle("street")} onFocus={focusStyle} onBlur={blurStyle("street")} />
+                  {errors.street && <span style={{ fontSize: "11px", color: "#ef4444", fontWeight: 500 }}>{errors.street}</span>}
+                </div>
+
+                {/* Province */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <select value={form.province}
+                    onChange={(e) => { setForm((f) => ({ ...f, province: e.target.value, municipality: "", barangay: "" })); setErrors((er) => ({ ...er, province: "" })); }}
+                    style={{ ...inputStyle("province"), color: form.province ? "#1a1a2e" : "#9ca3af", cursor: "pointer" }}
+                    onFocus={focusStyle} onBlur={blurStyle("province")}>
+                    <option value="">Select Province</option>
+                    {Object.keys(ADDRESS_DATA).map((p) => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  {errors.province && <span style={{ fontSize: "11px", color: "#ef4444", fontWeight: 500 }}>{errors.province}</span>}
+                </div>
+
+                {/* Municipality */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <select value={form.municipality} disabled={!form.province}
+                    onChange={(e) => { setForm((f) => ({ ...f, municipality: e.target.value, barangay: "" })); setErrors((er) => ({ ...er, municipality: "" })); }}
+                    style={{ ...inputStyle("municipality"), color: form.municipality ? "#1a1a2e" : "#9ca3af", cursor: form.province ? "pointer" : "not-allowed", opacity: form.province ? 1 : 0.6 }}
+                    onFocus={focusStyle} onBlur={blurStyle("municipality")}>
+                    <option value="">Select City / Municipality</option>
+                    {(form.province ? Object.keys(ADDRESS_DATA[form.province] ?? {}) : []).map((m) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                  {errors.municipality && <span style={{ fontSize: "11px", color: "#ef4444", fontWeight: 500 }}>{errors.municipality}</span>}
+                </div>
+
+                {/* Barangay */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <select value={form.barangay} disabled={!form.municipality}
+                    onChange={(e) => { setForm((f) => ({ ...f, barangay: e.target.value })); setErrors((er) => ({ ...er, barangay: "" })); }}
+                    style={{ ...inputStyle("barangay"), color: form.barangay ? "#1a1a2e" : "#9ca3af", cursor: form.municipality ? "pointer" : "not-allowed", opacity: form.municipality ? 1 : 0.6 }}
+                    onFocus={focusStyle} onBlur={blurStyle("barangay")}>
+                    <option value="">Select Barangay</option>
+                    {(form.province && form.municipality ? ADDRESS_DATA[form.province]?.[form.municipality] ?? [] : []).map((b) => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                  {errors.barangay && <span style={{ fontSize: "11px", color: "#ef4444", fontWeight: 500 }}>{errors.barangay}</span>}
+                </div>
+
+                {/* Full address preview */}
+                {form.barangay && (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "9px 12px", borderRadius: "10px", background: "rgba(217,119,6,0.05)", border: "1px solid rgba(217,119,6,0.15)" }}>
+                    <MapPin size={13} color="#d97706" style={{ flexShrink: 0, marginTop: "2px" }} />
+                    <span style={{ fontSize: "12px", color: "#92400e", fontWeight: 500, lineHeight: 1.5 }}>
+                      {[form.street, form.barangay, form.municipality, form.province].filter(Boolean).join(", ")}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Date + Time */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em" }}>Preferred Date</label>
+                  <CalendarPicker value={form.date} onChange={(d) => { setForm((f) => ({ ...f, date: d })); setErrors((er) => ({ ...er, date: "" })); }} hasError={!!errors.date} />
+                  {errors.date && <span style={{ fontSize: "11px", color: "#ef4444", fontWeight: 500 }}>{errors.date}</span>}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em" }}>Preferred Time</label>
+                  <select value={form.time} onChange={set("time")}
+                    style={{ ...inputStyle("time"), color: form.time ? "#1a1a2e" : "#9ca3af", cursor: "pointer" }}
+                    onFocus={focusStyle} onBlur={blurStyle("time")}>
+                    <option value="">Select time</option>
+                    {["8:00 AM","9:00 AM","10:00 AM","11:00 AM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM"].map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                  {errors.time && <span style={{ fontSize: "11px", color: "#ef4444", fontWeight: 500 }}>{errors.time}</span>}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Additional Notes <span style={{ color: "#9ca3af", fontWeight: 500, textTransform: "none", letterSpacing: 0 }}>(optional)</span>
+                </label>
+                <textarea value={form.notes} rows={3} onChange={set("notes")}
+                  placeholder="e.g. 2nd floor unit, gate code is 1234, etc."
+                  style={{ padding: "10px 14px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", fontSize: "14px", color: "#1a1a2e", fontFamily: "'Plus Jakarta Sans',sans-serif", outline: "none", resize: "vertical", background: "#fff", lineHeight: 1.5, width: "100%", boxSizing: "border-box" }}
+                  onFocus={focusStyle} onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; e.currentTarget.style.boxShadow = "none"; }}
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ padding: "16px 28px 24px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: "10px" }}>
+              <button onClick={onClose} style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", fontSize: "14px", fontWeight: 600, color: "#374151", cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                Cancel
+              </button>
+              <button onClick={handleSubmit} disabled={loading}
+                style={{ flex: 2, padding: "12px", borderRadius: "12px", background: loading ? "#e5e7eb" : "#d97706", color: loading ? "#9ca3af" : "#fff", fontSize: "14px", fontWeight: 700, border: "none", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", boxShadow: loading ? "none" : "0 4px 14px rgba(217,119,6,0.35)", transition: "background .15s" }}>
+                {loading
+                  ? <><Loader size={15} style={{ animation: "spin .8s linear infinite" }} /> Submitting...</>
+                  : <><Calendar size={15} /> Confirm Booking</>}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes popIn { from { opacity:0; transform:translate(-50%,-48%) scale(0.96); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
+      `}</style>
+    </>
+  );
+}
+
 // ── Cleaning Card ─────────────────────────────────────────────────────────────
-function CleaningCard({ service: s, index: i }: { service: Service; index: number }) {
-  const [selected, setSelected] = useState(0);
+function CleaningCard({ service: s, index: i, onBook }: { service: Service; index: number; onBook: (s: { name: string; price: string }) => void }) {
+  const [selected,     setSelected]     = useState(0);
+  const [cleaningType, setCleaningType] = useState<"normal" | "deep">("normal");
+
+  const isSplit = s.icon === "split";
   const variant = s.variants![selected];
+
+  // Parse HP from variant label to determine surcharge
+  const hpValue = parseFloat(variant.label.replace("HP","").trim());
+  const isLargeUnit = hpValue >= 2.5;
+  const SURCHARGE = 200;
+
+  // Base price: split uses cleaning type, window uses variant price
+  const basePrice  = isSplit ? (cleaningType === "normal" ? 1000 : 1500) : variant.price;
+  const displayPrice = basePrice + (isLargeUnit ? SURCHARGE : 0);
+
+  const CLEANING_TYPES = [
+    {
+      key: "normal" as const,
+      label: "Normal Cleaning",
+      tagalog: "Sinasahuran",
+      price: 1000,
+      desc: "Filter wash, coil cleaning, drain check",
+      icon: <Droplets size={13} color="#0891b2" />,
+      bg: "rgba(8,145,178,0.06)",
+      border: "rgba(8,145,178,0.2)",
+      active: { bg: "rgba(8,145,178,0.08)", border: "#0891b2", color: "#0e7490" },
+    },
+    {
+      key: "deep" as const,
+      label: "Deep Cleaning",
+      tagalog: "Unit dismantled",
+      price: 1500,
+      desc: "Indoor unit removed for thorough cleaning",
+      icon: <Wrench size={13} color="#d97706" />,
+      bg: "rgba(217,119,6,0.06)",
+      border: "rgba(217,119,6,0.2)",
+      active: { bg: "rgba(217,119,6,0.08)", border: "#d97706", color: "#b45309" },
+    },
+  ];
 
   return (
     <div className="service-card" style={{ animationDelay: `${i * 0.08}s` }}>
@@ -200,9 +746,11 @@ function CleaningCard({ service: s, index: i }: { service: Service; index: numbe
           </span>
         )}
         {s.icon === "window" ? <WindowACIcon /> : <SplitACIcon />}
-        <div style={{ marginTop: "12px", display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "100px", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
-          <Droplets size={11} color="#16a34a" />
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "#16a34a" }}>Deep Cleaning Service</span>
+        <div style={{ marginTop: "12px", display: "inline-flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "100px", background: isSplit && cleaningType === "deep" ? "rgba(217,119,6,0.08)" : "rgba(34,197,94,0.08)", border: `1px solid ${isSplit && cleaningType === "deep" ? "rgba(217,119,6,0.25)" : "rgba(34,197,94,0.2)"}` }}>
+          {isSplit && cleaningType === "deep"
+            ? <><Wrench size={11} color="#d97706" /><span style={{ fontSize: "11px", fontWeight: 700, color: "#b45309" }}>Deep Cleaning — Unit Removed</span></>
+            : <><Droplets size={11} color="#16a34a" /><span style={{ fontSize: "11px", fontWeight: 700, color: "#16a34a" }}>{isSplit ? "Normal Cleaning — Sinasahuran" : "Deep Cleaning Service"}</span></>
+          }
         </div>
       </div>
 
@@ -214,6 +762,38 @@ function CleaningCard({ service: s, index: i }: { service: Service; index: numbe
         </div>
         <h3 className="outfit" style={{ fontSize: "18px", fontWeight: 800, color: "#1a1a2e", margin: "4px 0 10px", letterSpacing: "-0.3px" }}>{s.name}</h3>
         <p style={{ fontSize: "13px", color: "#6b7280", lineHeight: 1.6, marginBottom: "16px" }}>{s.description}</p>
+
+        {/* ── Normal vs Deep selector (split type only) ── */}
+        {isSplit && (
+          <div style={{ marginBottom: "16px" }}>
+            <p style={{ fontSize: "11px", fontWeight: 700, color: "#1a1a2e", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Cleaning Type</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {CLEANING_TYPES.map((ct) => {
+                const isActive = cleaningType === ct.key;
+                return (
+                  <button key={ct.key} onClick={() => setCleaningType(ct.key)} type="button"
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: "12px", border: `1.5px solid ${isActive ? ct.active.border : "rgba(0,0,0,0.08)"}`, background: isActive ? ct.active.bg : "#fff", cursor: "pointer", transition: "all .15s", textAlign: "left", fontFamily: "'Plus Jakarta Sans',sans-serif", width: "100%" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{ width: "30px", height: "30px", borderRadius: "8px", background: isActive ? (ct.key === "deep" ? "rgba(217,119,6,0.12)" : "rgba(8,145,178,0.12)") : "rgba(0,0,0,0.04)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        {ct.icon}
+                      </div>
+                      <div>
+                        <p style={{ fontSize: "13px", fontWeight: 700, color: isActive ? ct.active.color : "#374151", margin: 0 }}>{ct.label}</p>
+                        <p style={{ fontSize: "11px", color: isActive ? ct.active.color : "#9ca3af", margin: "1px 0 0", fontWeight: 500, opacity: isActive ? 0.8 : 1 }}>{ct.tagalog} · {ct.desc}</p>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                      <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: "14px", fontWeight: 800, color: isActive ? ct.active.color : "#374151" }}>₱{ct.price.toLocaleString()}</span>
+                      <div style={{ width: "18px", height: "18px", borderRadius: "50%", border: `2px solid ${isActive ? ct.active.border : "rgba(0,0,0,0.15)"}`, background: isActive ? ct.active.border : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        {isActive && <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#fff" }} />}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Includes */}
         <div style={{ marginBottom: "16px" }}>
@@ -237,17 +817,28 @@ function CleaningCard({ service: s, index: i }: { service: Service; index: numbe
           <span style={{ fontSize: "12px", color: "#1a1a2e", fontWeight: 700 }}>{s.duration}</span>
         </div>
 
-        {/* Variant selector */}
+        {/* HP variant selector (still shown for both) */}
         <div style={{ marginBottom: "20px" }}>
-          <p style={{ fontSize: "11px", fontWeight: 700, color: "#1a1a2e", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Select Type</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+            <p style={{ fontSize: "11px", fontWeight: 700, color: "#1a1a2e", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>Select HP</p>
+            <span style={{ fontSize: "10px", fontWeight: 600, color: "#9ca3af" }}>+₱200 for 2.5HP & above</span>
+          </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            {s.variants!.map((v, idx) => (
-              <button key={v.label} onClick={() => setSelected(idx)}
-                style={{ flex: 1, padding: "10px 8px", borderRadius: "10px", cursor: "pointer", border: selected === idx ? "1.5px solid #d97706" : "1.5px solid rgba(0,0,0,0.1)", background: selected === idx ? "rgba(217,119,6,0.06)" : "#fff", transition: "all .15s", textAlign: "center" as const, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-                <p style={{ fontSize: "12px", fontWeight: 700, color: selected === idx ? "#d97706" : "#374151", margin: 0 }}>{v.label}</p>
-                {v.sublabel && <p style={{ fontSize: "10px", color: selected === idx ? "#d97706" : "#9ca3af", margin: "2px 0 0", fontWeight: 500 }}>{v.sublabel}</p>}
-              </button>
-            ))}
+            {s.variants!.map((v, idx) => {
+              const hp     = parseFloat(v.label.replace("HP","").trim());
+              const isLarge = hp >= 2.5;
+              const isActive = selected === idx;
+              return (
+                <button key={v.label} onClick={() => setSelected(idx)}
+                  style={{ flex: 1, padding: "10px 8px", borderRadius: "10px", cursor: "pointer", border: isActive ? "1.5px solid #d97706" : "1.5px solid rgba(0,0,0,0.1)", background: isActive ? "rgba(217,119,6,0.06)" : "#fff", transition: "all .15s", textAlign: "center" as const, fontFamily: "'Plus Jakarta Sans',sans-serif", position: "relative" }}>
+                  <p style={{ fontSize: "12px", fontWeight: 700, color: isActive ? "#d97706" : "#374151", margin: 0 }}>{v.label}</p>
+                  {v.sublabel && <p style={{ fontSize: "10px", color: isActive ? "#d97706" : "#9ca3af", margin: "2px 0 0", fontWeight: 500 }}>{v.sublabel}</p>}
+                  {isLarge && (
+                    <span style={{ display: "block", marginTop: "4px", fontSize: "9px", fontWeight: 700, color: isActive ? "#d97706" : "#9ca3af", letterSpacing: "0.03em" }}>+₱200</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -255,9 +846,17 @@ function CleaningCard({ service: s, index: i }: { service: Service; index: numbe
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "16px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
           <div>
             <p style={{ fontSize: "10px", color: "#9ca3af", margin: "0 0 1px", fontWeight: 500 }}>Service fee</p>
-            <span className="outfit" style={{ fontSize: "26px", fontWeight: 900, color: "#1a1a2e", letterSpacing: "-0.5px" }}>{formatPrice(variant.price)}</span>
+            <span className="outfit" style={{ fontSize: "26px", fontWeight: 900, color: "#1a1a2e", letterSpacing: "-0.5px" }}>{formatPrice(displayPrice)}</span>
+            {isLargeUnit && (
+              <p style={{ fontSize: "11px", color: "#9ca3af", margin: "2px 0 0", fontWeight: 500 }}>
+                {formatPrice(basePrice)} <span style={{ color: "#d97706", fontWeight: 700 }}>+ ₱200 large unit</span>
+              </p>
+            )}
           </div>
-          <a href="https://m.me/emerenph" target="_blank" rel="noopener noreferrer" className="book-btn">
+          <a onClick={() => onBook({
+            name: isSplit ? `${s.name} — ${cleaningType === "normal" ? "Normal Cleaning" : "Deep Cleaning"}` : s.name,
+            price: formatPrice(displayPrice),
+          })} className="book-btn" style={{ cursor: "pointer" }}>
             <Phone size={14} /> Book Now
           </a>
         </div>
@@ -267,7 +866,7 @@ function CleaningCard({ service: s, index: i }: { service: Service; index: numbe
 }
 
 // ── Repair / Other AC Card ────────────────────────────────────────────────────
-function RepairCard({ service: s, index: i }: { service: Service; index: number }) {
+function RepairCard({ service: s, index: i, onBook }: { service: Service; index: number; onBook: (s: { name: string; price: string }) => void }) {
   const accentColors: Record<string, { bg: string; border: string; check: string; badge: string; label: string; labelColor: string }> = {
     Repair:      { bg: "rgba(59,130,246,0.06)",  border: "rgba(59,130,246,0.18)",  check: "#2563eb", badge: "#16a34a", label: "Repair Service",    labelColor: "#2563eb" },
     Recharge:    { bg: "rgba(34,197,94,0.05)",   border: "rgba(34,197,94,0.15)",   check: "#16a34a", badge: "#16a34a", label: "Recharge Service",  labelColor: "#16a34a" },
@@ -347,7 +946,7 @@ function RepairCard({ service: s, index: i }: { service: Service; index: number 
         </div>
 
         <div style={{ display: "flex", paddingTop: "16px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-          <a href="https://m.me/emerenph" target="_blank" rel="noopener noreferrer" className="book-btn" style={{ flex: 1, justifyContent: "center" }}>
+          <a onClick={() => onBook({ name: s.name, price: "Free Diagnosis" })} className="book-btn" style={{ flex: 1, justifyContent: "center", cursor: "pointer" }}>
             <Phone size={14} /> Book via Messenger
           </a>
         </div>
@@ -382,6 +981,7 @@ export default function ServicesPage() {
   const [userMenuOpen,  setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [cartCount,     setCartCount]    = useState(0);
+  const [bookingService, setBookingService] = useState<{ name: string; price: string } | null>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -431,6 +1031,8 @@ export default function ServicesPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#f8f7f4", fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", color: "#1a1a2e" }}>
+      {/* ── Booking Modal ── */}
+      <BookingModal service={bookingService} onClose={() => setBookingService(null)} user={user} />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
         * { box-sizing: border-box; }
@@ -527,7 +1129,7 @@ export default function ServicesPage() {
 
             {/* Nav links — desktop only */}
             <nav className="desktop-only" style={{ alignItems: "center", gap: "28px", justifyContent: "center" }}>
-              {([["Shop", "/shop"], ["Services", "/services"], ["Contact", "/contact"], ["About", "/about"]] as [string, string][]).map(([label, href]) => (
+              {([["Shop", "/shop"], ["Services", "/services"], ["Contact Us", "/contact"], ["About Us", "/about"]] as [string, string][]).map(([label, href]) => (
                 <Link key={label} href={href} className="nav-link"
                   style={{ color: label === "Services" ? "#d97706" : "#6b7280", fontSize: "14px", fontWeight: label === "Services" ? 600 : 500, textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
@@ -633,8 +1235,8 @@ export default function ServicesPage() {
               {([
                 { label: "Shop",     href: "/shop",     icon: <ShoppingCart size={16} color="#d97706" /> },
                 { label: "Services", href: "/services", icon: <Wrench size={16} color="#d97706" /> },
-                { label: "About",    href: "/about",    icon: <Shield size={16} color="#d97706" /> },
-                { label: "Contact",  href: "/contact",  icon: <Phone size={16} color="#d97706" /> },
+                { label: "About Us",    href: "/about",    icon: <Shield size={16} color="#d97706" /> },
+                { label: "Contact Us",  href: "/contact",  icon: <Phone size={16} color="#d97706" /> },
               ]).map(({ label, href, icon }) => (
                 <Link key={label} href={href} className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
                   <span className="link-icon">{icon}</span>{label}
@@ -726,7 +1328,7 @@ export default function ServicesPage() {
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(360px,1fr))", gap: "24px" }}>
-          {cleaningServices.map((s, i) => <CleaningCard key={s.id} service={s} index={i} />)}
+          {cleaningServices.map((s, i) => <CleaningCard key={s.id} service={s} index={i} onBook={setBookingService} />)}
         </div>
       </div>
 
@@ -739,7 +1341,7 @@ export default function ServicesPage() {
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(360px,1fr))", gap: "24px" }}>
-          {repairServices.map((s, i) => <RepairCard key={s.id} service={s} index={i} />)}
+          {repairServices.map((s, i) => <RepairCard key={s.id} service={s} index={i} onBook={setBookingService} />)}
         </div>
       </div>
 
@@ -752,7 +1354,7 @@ export default function ServicesPage() {
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(360px,1fr))", gap: "24px" }}>
-          {otherACServices.map((s, i) => <RepairCard key={s.id} service={s} index={i} />)}
+          {otherACServices.map((s, i) => <RepairCard key={s.id} service={s} index={i} onBook={setBookingService} />)}
         </div>
       </div>
 
@@ -837,7 +1439,7 @@ export default function ServicesPage() {
           </div>
           <p style={{ fontSize: "12px", color: "#d1d5db" }}>© {new Date().getFullYear()} Emeren. All rights reserved.</p>
           <div style={{ display: "flex", gap: "20px" }}>
-            {([["Privacy Policy", "/privacy"], ["Terms", "/terms"], ["Contact", "/contact"]] as [string, string][]).map(([label, href]) => (
+            {([["Privacy Policy", "/privacy"], ["Terms", "/terms"], ["Contact Us", "/contact"]] as [string, string][]).map(([label, href]) => (
               <Link key={label} href={href} style={{ fontSize: "12px", color: "#d1d5db", textDecoration: "none", transition: "color .2s" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "#6b7280")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "#d1d5db")}
