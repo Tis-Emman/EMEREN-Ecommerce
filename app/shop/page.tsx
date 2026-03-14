@@ -1,0 +1,469 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase";
+import {
+  Triangle, ArrowRight, Search, SlidersHorizontal, Star,
+  ChevronDown, X, Zap, Wind, Building2, Layers, Package,
+  Check, ShoppingCart, User, LogOut,
+} from "lucide-react";
+import { ALL_PRODUCTS, BRANDS, BADGE_COLORS, type Product } from "@/lib/products";
+
+const CATEGORIES = [
+  { label: "All",        value: "all",         icon: <Layers    size={15} /> },
+  { label: "Split-Type", value: "Split-Type",  icon: <Wind      size={15} /> },
+  { label: "Cassette",   value: "Cassette",    icon: <Building2 size={15} /> },
+  { label: "Portable",   value: "Portable",    icon: <Package   size={15} /> },
+  { label: "Multi-Split",value: "Multi-Split", icon: <Zap       size={15} /> },
+  { label: "VRF/Ducted", value: "VRF/Ducted",  icon: <Building2 size={15} /> },
+];
+
+const SORT_OPTIONS = ["Featured", "Price: Low to High", "Price: High to Low", "Top Rated", "Most Reviews"];
+
+const formatPrice = (n: number) => `₱${n.toLocaleString()}`;
+
+export default function ShopPage() {
+  const router = useRouter();
+  const [scrolled,      setScrolled]      = useState(false);
+  const [search,        setSearch]        = useState("");
+  const [category,      setCategory]      = useState("all");
+  const [brand,         setBrand]         = useState("All Brands");
+  const [sort,          setSort]          = useState("Featured");
+  const [maxPrice,      setMaxPrice]      = useState(350000);
+  const [filterOpen,    setFilterOpen]    = useState(false);
+  const [sortOpen,      setSortOpen]      = useState(false);
+  const [cartCount,     setCartCount]     = useState(0);
+  const [user,          setUser]          = useState<{ email: string } | null>(null);
+  const [userMenuOpen,  setUserMenuOpen]  = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ? { email: data.user.email ?? "" } : null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ? { email: session.user.email ?? "" } : null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null); setUserMenuOpen(false);
+    router.push("/");
+  };
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Filter products — price check uses the lowest variant price
+  const filtered = ALL_PRODUCTS
+    .filter((p) => {
+      const lowestPrice = Math.min(...p.variants.map((v) => v.price));
+      const matchSearch   = p.series.toLowerCase().includes(search.toLowerCase())
+                         || p.brand.toLowerCase().includes(search.toLowerCase());
+      const matchCategory = category === "all" || p.type === category;
+      const matchBrand    = brand === "All Brands" || p.brand === brand;
+      const matchPrice    = lowestPrice <= maxPrice;
+      return matchSearch && matchCategory && matchBrand && matchPrice;
+    })
+    .sort((a, b) => {
+      const aPrice = Math.min(...a.variants.map((v) => v.price));
+      const bPrice = Math.min(...b.variants.map((v) => v.price));
+      if (sort === "Price: Low to High")  return aPrice - bPrice;
+      if (sort === "Price: High to Low")  return bPrice - aPrice;
+      if (sort === "Top Rated")           return b.rating - a.rating;
+      if (sort === "Most Reviews")        return b.reviews - a.reviews;
+      return 0;
+    });
+
+  const activeFilters = [
+    category !== "all"      && category,
+    brand !== "All Brands"  && brand,
+    maxPrice < 350000       && `Under ${formatPrice(maxPrice)}`,
+  ].filter(Boolean) as string[];
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f8f7f4", fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", color: "#1a1a2e" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        * { box-sizing: border-box; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes popIn  { from { opacity:0; transform:scale(0.95); }     to { opacity:1; transform:scale(1); } }
+        .brand  { font-family:'Outfit',sans-serif; letter-spacing:-0.02em; }
+        .outfit { font-family:'Outfit',sans-serif; }
+        .glass  { background:rgba(248,247,244,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(0,0,0,0.07); }
+        .nav-link { position:relative; }
+        .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1.5px; background:#d97706; transition:width .25s; }
+        .nav-link:hover::after { width:100%; }
+        .product-card {
+          background:#fff; border:1px solid rgba(0,0,0,0.07); border-radius:20px; overflow:hidden;
+          transition:transform .25s, box-shadow .25s, border-color .25s;
+          box-shadow:0 2px 12px rgba(0,0,0,0.05); animation:fadeUp .4s ease both;
+          cursor: pointer;
+        }
+        .product-card:hover { transform:translateY(-5px); box-shadow:0 20px 48px rgba(0,0,0,0.1); border-color:rgba(217,119,6,.25); }
+        .cat-pill {
+          display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:100px;
+          border:1.5px solid rgba(0,0,0,0.1); background:#fff; font-size:13px; font-weight:600;
+          color:#6b7280; cursor:pointer; transition:all .2s; white-space:nowrap;
+          font-family:'Plus Jakarta Sans',sans-serif;
+        }
+        .cat-pill:hover { border-color:rgba(217,119,6,.4); color:#d97706; background:#fffbf2; }
+        .cat-pill.active { background:#d97706; border-color:#d97706; color:#fff; }
+        .filter-btn {
+          display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border-radius:12px;
+          border:1.5px solid rgba(0,0,0,0.1); background:#fff; font-size:13px; font-weight:600;
+          color:#374151; cursor:pointer; transition:all .2s; font-family:'Plus Jakarta Sans',sans-serif;
+        }
+        .filter-btn:hover { border-color:rgba(217,119,6,.4); background:#fffbf2; }
+        .filter-btn.active { border-color:#d97706; color:#d97706; background:rgba(217,119,6,.06); }
+        .search-input {
+          width:100%; padding:10px 16px 10px 40px; border-radius:12px;
+          border:1.5px solid rgba(0,0,0,0.1); background:#fff; font-size:14px; color:#1a1a2e;
+          outline:none; transition:border-color .2s, box-shadow .2s; font-family:'Plus Jakarta Sans',sans-serif;
+        }
+        .search-input:focus { border-color:#d97706; box-shadow:0 0 0 3px rgba(217,119,6,0.1); }
+        .search-input::placeholder { color:#9ca3af; }
+        .filter-panel { background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:16px; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.08); animation:popIn .2s ease both; }
+        .dropdown { background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.1); overflow:hidden; animation:popIn .15s ease both; min-width:200px; }
+        .dropdown-item { padding:10px 16px; font-size:13px; font-weight:500; color:#374151; cursor:pointer; transition:background .15s; font-family:'Plus Jakarta Sans',sans-serif; }
+        .dropdown-item:hover { background:#fffbf2; color:#d97706; }
+        .dropdown-item.selected { color:#d97706; font-weight:700; background:rgba(217,119,6,.05); }
+        .badge { padding:2px 8px; border-radius:6px; font-size:10px; font-weight:700; }
+        .range-input { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:linear-gradient(to right,#d97706 0%,#d97706 var(--val),#e5e7eb var(--val),#e5e7eb 100%); outline:none; cursor:pointer; }
+        .range-input::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:#d97706; cursor:pointer; box-shadow:0 2px 6px rgba(217,119,6,0.4); border:2px solid #fff; }
+        .hp-pill {
+          padding:3px 9px; border-radius:6px; font-size:11px; font-weight:700;
+          border:1.5px solid rgba(0,0,0,0.09); background:#f8f7f4; color:#374151;
+          transition: all .15s;
+        }
+        .hp-pill:hover { border-color:#d97706; color:#d97706; background:#fffbf2; }
+        .empty-state { animation:fadeUp .4s ease both; }
+      `}</style>
+
+      {/* ── Navbar ── */}
+      <header style={{ position:"fixed", top:0, left:0, right:0, zIndex:50 }}>
+        <div className={scrolled ? "glass" : ""} style={{ transition:"all .3s", borderBottom: scrolled ? undefined : "1px solid transparent" }}>
+          <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"0 24px", height:"68px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+            <Link href="/" style={{ display:"flex", alignItems:"center", gap:"8px", textDecoration:"none" }}>
+              <span style={{ width:"30px", height:"30px", borderRadius:"8px", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, boxShadow:"0 3px 10px rgba(217,119,6,0.3)" }}>
+                <Triangle size={13} color="#fff" fill="#fff" />
+              </span>
+              <span className="brand" style={{ color:"#1a1a2e", fontSize:"20px", fontWeight:800 }}>EMEREN</span>
+            </Link>
+
+            <nav style={{ display:"flex", alignItems:"center", gap:"32px" }}>
+              {[["Products","/shop"],["Services","/services"],["About","/#about"],["Contact","/#contact"]].map(([label,href]) => (
+                <Link key={label} href={href} className="nav-link"
+                  style={{ color: label==="Products" ? "#d97706" : "#6b7280", fontSize:"14px", fontWeight: label==="Products" ? 700 : 500, textDecoration:"none", transition:"color .2s" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color="#1a1a2e")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color= label==="Products" ? "#d97706" : "#6b7280")}
+                >{label}</Link>
+              ))}
+            </nav>
+
+            <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+              <Link href="/cart" style={{ position:"relative", width:"40px", height:"40px", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.1)", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none", transition:"all .2s", flexShrink:0 }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor="rgba(217,119,6,.4)"; e.currentTarget.style.background="#fffbf2"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor="rgba(0,0,0,0.1)"; e.currentTarget.style.background="#fff"; }}
+              >
+                <ShoppingCart size={17} color="#374151" />
+                {cartCount > 0 && (
+                  <span style={{ position:"absolute", top:"-5px", right:"-5px", width:"17px", height:"17px", borderRadius:"50%", background:"#d97706", color:"#fff", fontSize:"9px", fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                    {cartCount > 9 ? "9+" : cartCount}
+                  </span>
+                )}
+              </Link>
+
+              {user ? (
+                <div style={{ position:"relative" }}>
+                  <button onClick={() => setUserMenuOpen((v) => !v)}
+                    style={{ display:"flex", alignItems:"center", gap:"8px", padding:"7px 14px", borderRadius:"12px", border:"1.5px solid rgba(217,119,6,0.3)", background:"rgba(217,119,6,0.06)", cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                    <div style={{ width:"24px", height:"24px", borderRadius:"50%", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                      <User size={13} color="#fff" />
+                    </div>
+                    <span style={{ fontSize:"13px", fontWeight:600, color:"#1a1a2e", maxWidth:"120px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      {user.email.split("@")[0]}
+                    </span>
+                  </button>
+                  {userMenuOpen && (
+                    <div style={{ position:"absolute", top:"calc(100% + 8px)", right:0, background:"#fff", border:"1px solid rgba(0,0,0,0.08)", borderRadius:"14px", boxShadow:"0 8px 32px rgba(0,0,0,0.1)", padding:"8px", minWidth:"180px", zIndex:100 }}>
+                      <div style={{ padding:"8px 12px 12px", borderBottom:"1px solid rgba(0,0,0,0.06)", marginBottom:"6px" }}>
+                        <p style={{ fontSize:"11px", color:"#9ca3af", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.05em" }}>Signed in as</p>
+                        <p style={{ fontSize:"13px", fontWeight:700, color:"#1a1a2e", marginTop:"2px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.email}</p>
+                      </div>
+                      <Link href="/profile" style={{ display:"flex", alignItems:"center", gap:"8px", padding:"9px 12px", borderRadius:"9px", fontSize:"13px", fontWeight:600, color:"#374151", textDecoration:"none" }} onClick={() => setUserMenuOpen(false)}>
+                        <User size={14} /> My Profile
+                      </Link>
+                      <button onClick={handleSignOut} style={{ width:"100%", display:"flex", alignItems:"center", gap:"8px", padding:"9px 12px", borderRadius:"9px", border:"none", background:"none", cursor:"pointer", fontSize:"13px", fontWeight:600, color:"#ef4444", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                        <LogOut size={14} /> Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <Link href="/auth/signin" style={{ padding:"8px 18px", fontSize:"13px", fontWeight:600, textDecoration:"none", color:"#374151", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.12)", transition:"all .2s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor="rgba(217,119,6,.5)"; e.currentTarget.style.color="#d97706"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor="rgba(0,0,0,0.12)"; e.currentTarget.style.color="#374151"; }}
+                  >Sign In</Link>
+                  <Link href="/auth/signup" style={{ padding:"9px 20px", fontSize:"13px", fontWeight:700, textDecoration:"none", color:"#fff", borderRadius:"12px", background:"#d97706", display:"flex", alignItems:"center", gap:"6px", boxShadow:"0 4px 14px rgba(217,119,6,0.35)", transition:"background .15s" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background="#b45309")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background="#d97706")}
+                  >Get Started <ArrowRight size={13} /></Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Page hero ── */}
+      <div style={{ paddingTop:"100px", paddingBottom:"40px", paddingLeft:"24px", paddingRight:"24px", maxWidth:"1280px", margin:"0 auto" }}>
+        <p style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", color:"#d97706", marginBottom:"10px", fontFamily:"'Outfit',sans-serif" }}>Our Collection</p>
+        <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", flexWrap:"wrap", gap:"12px" }}>
+          <h1 className="outfit" style={{ fontSize:"clamp(28px,5vw,48px)", fontWeight:900, letterSpacing:"-1.5px", color:"#1a1a2e", lineHeight:1.1 }}>All Products</h1>
+          <p style={{ fontSize:"14px", color:"#9ca3af" }}>
+            Showing <span style={{ color:"#1a1a2e", fontWeight:700 }}>{filtered.length}</span> of {ALL_PRODUCTS.length} models
+          </p>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div style={{ position:"sticky", top:"68px", zIndex:40, background:"rgba(248,247,244,0.95)", backdropFilter:"blur(12px)", borderBottom:"1px solid rgba(0,0,0,0.06)", padding:"14px 24px" }}>
+        <div style={{ maxWidth:"1280px", margin:"0 auto", display:"flex", flexDirection:"column", gap:"12px" }}>
+          <div style={{ display:"flex", gap:"10px", alignItems:"center" }}>
+            {/* Search */}
+            <div style={{ position:"relative", flex:1, maxWidth:"360px" }}>
+              <Search size={15} color="#9ca3af" style={{ position:"absolute", left:"13px", top:"50%", transform:"translateY(-50%)" }} />
+              <input className="search-input" placeholder="Search by brand or series..." value={search} onChange={(e) => setSearch(e.target.value)} />
+              {search && (
+                <button onClick={() => setSearch("")} style={{ position:"absolute", right:"12px", top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:"#9ca3af", display:"flex" }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Filter toggle */}
+            <div style={{ position:"relative" }}>
+              <button className={`filter-btn ${filterOpen ? "active" : ""}`} onClick={() => { setFilterOpen(v => !v); setSortOpen(false); }}>
+                <SlidersHorizontal size={14} /> Filters
+                {activeFilters.length > 0 && (
+                  <span style={{ width:"18px", height:"18px", borderRadius:"50%", background:"#d97706", color:"#fff", fontSize:"10px", fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center" }}>{activeFilters.length}</span>
+                )}
+              </button>
+              {filterOpen && (
+                <div className="filter-panel" style={{ position:"absolute", top:"calc(100% + 8px)", left:0, zIndex:100, width:"280px" }}>
+                  <p style={{ fontSize:"12px", fontWeight:700, color:"#1a1a2e", marginBottom:"14px", fontFamily:"'Outfit',sans-serif", letterSpacing:"0.05em", textTransform:"uppercase" }}>Brand</p>
+                  <div style={{ display:"flex", flexDirection:"column", gap:"6px", marginBottom:"20px" }}>
+                    {BRANDS.map((b) => (
+                      <div key={b} onClick={() => setBrand(b)} style={{ display:"flex", alignItems:"center", gap:"10px", padding:"8px 10px", borderRadius:"9px", cursor:"pointer", background: brand===b ? "rgba(217,119,6,.08)" : "transparent", transition:"background .15s" }}>
+                        <div style={{ width:"18px", height:"18px", borderRadius:"5px", border:`1.5px solid ${brand===b ? "#d97706" : "rgba(0,0,0,0.15)"}`, background: brand===b ? "#d97706" : "#fff", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all .15s" }}>
+                          {brand===b && <Check size={11} color="#fff" strokeWidth={3} />}
+                        </div>
+                        <span style={{ fontSize:"13px", color: brand===b ? "#d97706" : "#374151", fontWeight: brand===b ? 700 : 500 }}>{b}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize:"12px", fontWeight:700, color:"#1a1a2e", marginBottom:"10px", fontFamily:"'Outfit',sans-serif", letterSpacing:"0.05em", textTransform:"uppercase" }}>Max Price</p>
+                  <div style={{ marginBottom:"8px" }}>
+                    <input type="range" className="range-input" min={10000} max={350000} step={5000} value={maxPrice}
+                      onChange={(e) => setMaxPrice(Number(e.target.value))}
+                      style={{ "--val":`${((maxPrice-10000)/(350000-10000))*100}%` } as React.CSSProperties} />
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:"6px" }}>
+                      <span style={{ fontSize:"11px", color:"#9ca3af" }}>₱10,000</span>
+                      <span style={{ fontSize:"12px", fontWeight:700, color:"#d97706" }}>Up to {formatPrice(maxPrice)}</span>
+                      <span style={{ fontSize:"11px", color:"#9ca3af" }}>₱350,000</span>
+                    </div>
+                  </div>
+                  <button onClick={() => { setBrand("All Brands"); setMaxPrice(350000); setFilterOpen(false); }}
+                    style={{ width:"100%", marginTop:"8px", padding:"9px", borderRadius:"9px", border:"1.5px solid rgba(0,0,0,0.1)", background:"transparent", fontSize:"12px", fontWeight:600, color:"#6b7280", cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                    Reset Filters
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Sort */}
+            <div style={{ position:"relative", marginLeft:"auto" }}>
+              <button className={`filter-btn ${sortOpen ? "active" : ""}`} onClick={() => { setSortOpen(v => !v); setFilterOpen(false); }}>
+                Sort: <span style={{ color:"#d97706" }}>{sort}</span>
+                <ChevronDown size={13} style={{ transition:"transform .2s", transform: sortOpen ? "rotate(180deg)" : "rotate(0deg)" }} />
+              </button>
+              {sortOpen && (
+                <div className="dropdown" style={{ position:"absolute", top:"calc(100% + 8px)", right:0, zIndex:100 }}>
+                  {SORT_OPTIONS.map((opt) => (
+                    <div key={opt} className={`dropdown-item ${sort===opt ? "selected" : ""}`} onClick={() => { setSort(opt); setSortOpen(false); }}>
+                      {sort===opt && <span style={{ marginRight:"6px" }}>✓</span>}{opt}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Category pills */}
+          <div style={{ display:"flex", gap:"8px", overflowX:"auto", paddingBottom:"2px" }}>
+            {CATEGORIES.map((cat) => (
+              <button key={cat.value} className={`cat-pill ${category===cat.value ? "active" : ""}`} onClick={() => setCategory(cat.value)}>
+                {cat.icon} {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Active filter tags */}
+          {activeFilters.length > 0 && (
+            <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
+              {activeFilters.map((f) => (
+                <span key={f} style={{ display:"inline-flex", alignItems:"center", gap:"5px", padding:"3px 10px", borderRadius:"100px", background:"rgba(217,119,6,0.1)", border:"1px solid rgba(217,119,6,0.25)", fontSize:"12px", color:"#d97706", fontWeight:600 }}>
+                  {f}
+                  <X size={11} style={{ cursor:"pointer" }} onClick={() => {
+                    if (f === brand) setBrand("All Brands");
+                    else if (f === category) setCategory("all");
+                    else setMaxPrice(350000);
+                  }} />
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Product grid ── */}
+      <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"32px 24px 80px" }}>
+        {filtered.length === 0 ? (
+          <div className="empty-state" style={{ textAlign:"center", padding:"80px 24px" }}>
+            <div style={{ fontSize:"48px", marginBottom:"16px" }}>🔍</div>
+            <h3 className="outfit" style={{ fontSize:"22px", fontWeight:800, color:"#1a1a2e", marginBottom:"8px" }}>No products found</h3>
+            <p style={{ color:"#6b7280", fontSize:"14px", marginBottom:"20px" }}>Try adjusting your search or filters.</p>
+            <button onClick={() => { setSearch(""); setCategory("all"); setBrand("All Brands"); setMaxPrice(350000); }}
+              style={{ padding:"10px 24px", borderRadius:"10px", background:"#d97706", color:"#fff", border:"none", fontWeight:700, fontSize:"13px", cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+              Clear All Filters
+            </button>
+          </div>
+        ) : (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:"20px" }}>
+            {filtered.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+          </div>
+        )}
+      </div>
+
+      {/* ── Footer ── */}
+      <footer style={{ borderTop:"1px solid rgba(0,0,0,0.07)", padding:"40px 24px", background:"#fff" }}>
+        <div style={{ maxWidth:"1280px", margin:"0 auto", display:"flex", flexWrap:"wrap", justifyContent:"space-between", alignItems:"center", gap:"16px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+            <span style={{ width:"26px", height:"26px", borderRadius:"7px", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <Triangle size={11} color="#fff" fill="#fff" />
+            </span>
+            <span className="brand" style={{ fontSize:"16px", fontWeight:800, color:"#1a1a2e" }}>EMEREN</span>
+          </div>
+          <p style={{ fontSize:"12px", color:"#d1d5db" }}>© 2025 Emeren. All rights reserved.</p>
+          <div style={{ display:"flex", gap:"20px" }}>
+            {["Privacy Policy","Terms","Contact"].map((l) => (
+              <a key={l} href="#" style={{ fontSize:"12px", color:"#d1d5db", textDecoration:"none", transition:"color .2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color="#6b7280")}
+                onMouseLeave={(e) => (e.currentTarget.style.color="#d1d5db")}
+              >{l}</a>
+            ))}
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// ── Product Card ─────────────────────────────────────────────────────────────
+function ProductCard({ product: p, index: i }: { product: Product; index: number }) {
+  const [imgError, setImgError] = useState(false);
+  const lowestPrice = Math.min(...p.variants.map((v) => v.price));
+  const lowestOrig  = p.variants.find((v) => v.price === lowestPrice)?.orig ?? lowestPrice;
+  const discount    = Math.round(((lowestOrig - lowestPrice) / lowestOrig) * 100);
+  const hasInverter = p.variants.some((v) => v.tag === "Inverter");
+
+  return (
+    <Link href={`/shop/${p.id}`} style={{ textDecoration:"none", color:"inherit", display:"block" }}>
+      <div className="product-card" style={{ animationDelay:`${i * 0.05}s` }}>
+
+        {/* Image area */}
+        <div style={{ height:"190px", position:"relative", overflow:"hidden", background:"linear-gradient(145deg,#f0ede8 0%,#f8f7f4 50%,#ede9e2 100%)" }}>
+          <div style={{ position:"absolute", top:"-30px", right:"-30px", width:"130px", height:"130px", borderRadius:"50%", background:"rgba(217,119,6,0.06)", pointerEvents:"none" }} />
+          <div style={{ position:"absolute", bottom:"-20px", left:"-20px", width:"90px", height:"90px", borderRadius:"50%", background:"rgba(217,119,6,0.04)", pointerEvents:"none" }} />
+
+          {!imgError ? (
+            <img src={`/images/products/${p.id}.png`} alt={p.series}
+              onError={() => setImgError(true)}
+              style={{ width:"100%", height:"100%", objectFit:"contain", padding:"20px", display:"block", position:"relative", zIndex:1, mixBlendMode:"multiply" }} />
+          ) : (
+            <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:"6px", zIndex:1 }}>
+              <svg width="88" height="64" viewBox="0 0 88 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter:"drop-shadow(0 4px 14px rgba(217,119,6,0.18))" }}>
+                <rect x="4" y="16" width="80" height="36" rx="8" fill="#fff" stroke="rgba(217,119,6,0.25)" strokeWidth="1.5"/>
+                <line x1="14" y1="24" x2="14" y2="44" stroke="rgba(217,119,6,0.2)" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="20" y1="24" x2="20" y2="44" stroke="rgba(217,119,6,0.2)" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="26" y1="24" x2="26" y2="44" stroke="rgba(217,119,6,0.2)" strokeWidth="1.5" strokeLinecap="round"/>
+                <rect x="36" y="22" width="38" height="20" rx="4" fill="rgba(217,119,6,0.07)" stroke="rgba(217,119,6,0.15)" strokeWidth="1"/>
+                <text x="55" y="36" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d97706" fontFamily="Outfit,sans-serif">18°C</text>
+                <circle cx="44" cy="49" r="2" fill="#93c5fd" opacity="0.7"/>
+                <circle cx="52" cy="53" r="1.5" fill="#93c5fd" opacity="0.5"/>
+                <circle cx="60" cy="49" r="2" fill="#93c5fd" opacity="0.7"/>
+                <circle cx="76" cy="26" r="3" fill="#22c55e" opacity="0.8"/>
+              </svg>
+              <span style={{ fontSize:"10px", color:"#c4b5a0", fontWeight:600, letterSpacing:"0.03em" }}>{p.type}</span>
+            </div>
+          )}
+
+          {p.badge && (
+            <span style={{ position:"absolute", top:"12px", left:"12px", padding:"2px 8px", borderRadius:"6px", fontSize:"10px", fontWeight:700, background: BADGE_COLORS[p.badge]?.bg ?? "#d97706", color: BADGE_COLORS[p.badge]?.color ?? "#fff", zIndex:2 }}>
+              {p.badge}
+            </span>
+          )}
+          {hasInverter && (
+            <span style={{ position:"absolute", top:"12px", right:"12px", padding:"2px 8px", borderRadius:"5px", fontSize:"10px", fontWeight:600, background:"rgba(34,197,94,0.1)", color:"#16a34a", border:"1px solid rgba(34,197,94,0.25)", backdropFilter:"blur(4px)", zIndex:2 }}>
+              Inverter
+            </span>
+          )}
+        </div>
+
+        {/* Info */}
+        <div style={{ padding:"16px" }}>
+          <p style={{ color:"#9ca3af", fontSize:"10px", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em", margin:"0 0 2px" }}>{p.brand}</p>
+          <h3 style={{ color:"#1a1a2e", fontSize:"15px", fontWeight:700, margin:"0 0 10px", lineHeight:1.3 }}>{p.brand} {p.series}</h3>
+
+          {/* HP variant pills */}
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginBottom:"12px" }}>
+            {p.variants.map((v) => (
+              <span key={v.hp} className="hp-pill">{v.hp}</span>
+            ))}
+          </div>
+
+          {/* Rating */}
+          <div style={{ display:"flex", alignItems:"center", gap:"5px", marginBottom:"12px" }}>
+            <Star size={12} color="#d97706" fill="#d97706" />
+            <span style={{ fontSize:"12px", fontWeight:700, color:"#1a1a2e" }}>{p.rating}</span>
+            <span style={{ fontSize:"12px", color:"#9ca3af" }}>({p.reviews} reviews)</span>
+          </div>
+
+          {/* Price + CTA */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+            <div>
+              <p style={{ fontSize:"10px", color:"#9ca3af", margin:"0 0 1px" }}>Starting at</p>
+              <div style={{ display:"flex", alignItems:"baseline", gap:"5px" }}>
+                <span className="outfit" style={{ fontSize:"18px", fontWeight:800, color:"#1a1a2e" }}>{formatPrice(lowestPrice)}</span>
+                <span style={{ fontSize:"11px", color:"#d1d5db", textDecoration:"line-through" }}>{formatPrice(lowestOrig)}</span>
+              </div>
+            </div>
+            <span style={{ padding:"3px 9px", borderRadius:"7px", background:"rgba(239,68,68,0.08)", color:"#ef4444", fontSize:"11px", fontWeight:700 }}>
+              {discount}% OFF
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
