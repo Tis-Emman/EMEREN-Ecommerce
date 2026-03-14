@@ -163,25 +163,100 @@ export default function ShopPage() {
         }
         .hp-pill:hover { border-color:#d97706; color:#d97706; background:#fffbf2; }
         .empty-state { animation:fadeUp .4s ease both; }
-        .mobile-nav {
+        /* Hide on mobile, show on desktop */
+        .desktop-only { display: none !important; }
+        .nav-bar { display: flex; align-items: center; justify-content: space-between; }
+        @media (min-width: 768px) {
+          .desktop-only { display: flex !important; }
+          .mobile-menu-btn { display: none !important; }
+          .nav-bar { display: grid; grid-template-columns: 1fr auto 1fr; }
+        }
+
+        /* ── Mobile Nav Drawer ── */
+        .mobile-nav-backdrop {
           position: fixed; inset: 0;
-          background: rgba(248,247,244,0.97);
-          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-          z-index: 40; display: flex; flex-direction: column;
-          align-items: center; justify-content: center; gap: 32px;
+          background: rgba(0,0,0,0.35);
+          backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+          z-index: 45; animation: fadeUp .2s ease both;
         }
-        .mobile-nav a {
-          font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700;
-          color: #1a1a2e; text-decoration: none; letter-spacing: -0.5px; transition: color .2s;
+        .mobile-nav {
+          position: fixed; top: 0; right: 0; bottom: 0;
+          width: min(320px, 88vw);
+          background: #faf9f6; z-index: 50;
+          display: flex; flex-direction: column;
+          box-shadow: -8px 0 40px rgba(0,0,0,0.14);
+          animation: slideInRight .25s cubic-bezier(.22,1,.36,1) both;
+          overflow-y: auto;
         }
-        .mobile-nav a:hover { color: #d97706; }
-        @media (min-width: 768px) { .mobile-menu-btn { display: none !important; } }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .mobile-nav-header {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 18px 20px 16px; border-bottom: 1px solid rgba(0,0,0,0.07); flex-shrink: 0;
+        }
+        .mobile-nav-links { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; }
+        .mobile-nav-link {
+          display: flex; align-items: center; gap: 12px; padding: 13px 12px;
+          border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 15px; font-weight: 600; color: #374151; text-decoration: none;
+          transition: background .15s, color .15s; cursor: pointer;
+          background: none; border: none; width: 100%; text-align: left;
+        }
+        .mobile-nav-link:hover { background: rgba(217,119,6,0.07); color: #d97706; }
+        .mobile-nav-link .link-icon {
+          width: 34px; height: 34px; border-radius: 9px; background: rgba(0,0,0,0.04);
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s;
+        }
+        .mobile-nav-link:hover .link-icon { background: rgba(217,119,6,0.12); }
+        .mobile-nav-footer {
+          padding: 16px 20px 28px; border-top: 1px solid rgba(0,0,0,0.07);
+          display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
+        }
+        .mobile-nav-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 4px 12px; }
+
+        /* ── Mobile responsiveness ── */
+        @media (max-width: 767px) {
+          .filter-btn { padding: 8px 12px; font-size: 12px; }
+          .cat-pill   { padding: 7px 12px; font-size: 12px; }
+
+          /* Hide "Sign In" text on very small screens, keep Get Started */
+          .nav-signin-desktop { display: none !important; }
+
+          /* Toolbar search takes full width on its own row */
+          .toolbar-row { flex-wrap: wrap; }
+          .toolbar-search { max-width: 100% !important; flex: 1 1 100% !important; order: -1; }
+
+          /* Filter panel full-width on mobile */
+          .filter-panel-dropdown { width: calc(100vw - 48px) !important; left: 0 !important; right: 0 !important; }
+
+          /* Sort dropdown anchors right */
+          .sort-dropdown { right: 0 !important; left: auto !important; width: 200px; }
+
+          /* Product grid: 2 columns on mobile */
+          .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+
+          /* Product card tweaks for small screens */
+          .product-card .card-img  { height: 140px !important; }
+          .product-card .card-body { padding: 12px !important; }
+          .product-card .card-title { font-size: 13px !important; }
+          .product-card .card-price { font-size: 15px !important; }
+
+          /* Hero section compact */
+          .page-hero { padding-top: 230px !important; padding-bottom: 24px !important; }
+
+          /* Footer stack vertically */
+          .footer-inner { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+        }
+
+        @media (max-width: 400px) {
+          /* Single column on very small phones */
+          .product-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
       {/* ── Navbar ── */}
       <header style={{ position:"fixed", top:0, left:0, right:0, zIndex:50, transition:"all .3s" }}>
         <div className={scrolled ? "glass" : ""} style={{ transition:"all .3s", borderBottom: scrolled ? "1px solid rgba(0,0,0,0.07)" : "1px solid transparent" }}>
-          <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"0 24px", height:"68px", display:"grid", gridTemplateColumns:"1fr auto 1fr", alignItems:"center" }}>
+          <div className="nav-bar" style={{ maxWidth:"1280px", margin:"0 auto", padding:"0 24px", height:"68px", gap:"16px" }}>
 
             {/* Logo */}
             <Link href="/" style={{ display:"flex", alignItems:"center", gap:"8px", textDecoration:"none", flexShrink:0 }}>
@@ -191,8 +266,8 @@ export default function ShopPage() {
               <span className="brand" style={{ color:"#1a1a2e", fontSize:"20px", fontWeight:800, whiteSpace:"nowrap" }}>EMEREN</span>
             </Link>
 
-            {/* Nav links — desktop */}
-            <nav style={{ display:"flex", alignItems:"center", gap:"28px", justifyContent:"center" }} className="hidden md:flex">
+            {/* Nav links — desktop only */}
+            <nav className="desktop-only" style={{ alignItems:"center", gap:"28px", justifyContent:"center" }}>
               {([["Shop","/shop"],["Services","/services"],["Contact","/contact"],["About","/about"]] as [string,string][]).map(([label,href]) => (
                 <Link key={label} href={href} className="nav-link"
                   style={{ color: label==="Shop" ? "#d97706" : "#6b7280", fontSize:"14px", fontWeight: label==="Shop" ? 600 : 500, textDecoration:"none", transition:"color .2s" }}
@@ -219,7 +294,8 @@ export default function ShopPage() {
               {user ? (
                 <div style={{ position:"relative" }} ref={userMenuRef}>
                   <button onClick={() => setUserMenuOpen((v) => !v)}
-                    style={{ display:"flex", alignItems:"center", gap:"8px", padding:"7px 14px", borderRadius:"12px", border:"1.5px solid rgba(217,119,6,0.3)", background:"rgba(217,119,6,0.06)", cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", maxWidth:"200px" }}>
+                    className="desktop-only"
+                    style={{ alignItems:"center", gap:"8px", padding:"7px 14px", borderRadius:"12px", border:"1.5px solid rgba(217,119,6,0.3)", background:"rgba(217,119,6,0.06)", cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", maxWidth:"200px" }}>
                     <div style={{ width:"24px", height:"24px", borderRadius:"50%", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                       <User size={13} color="#fff" />
                     </div>
@@ -241,11 +317,13 @@ export default function ShopPage() {
                 </div>
               ) : (
                 <>
-                  <Link href="/auth/signin" className="hidden sm:flex" style={{ padding:"8px 18px", fontSize:"13px", fontWeight:600, textDecoration:"none", color:"#374151", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.12)", transition:"all .2s", display:"flex", alignItems:"center" }}
+                  <Link href="/auth/signin" className="desktop-only"
+                    style={{ alignItems:"center", padding:"8px 18px", fontSize:"13px", fontWeight:600, textDecoration:"none", color:"#374151", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.12)", transition:"all .2s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor="rgba(217,119,6,.5)"; e.currentTarget.style.color="#d97706"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor="rgba(0,0,0,0.12)"; e.currentTarget.style.color="#374151"; }}
                   >Sign In</Link>
-                  <Link href="/auth/signup" style={{ padding:"9px 20px", fontSize:"13px", fontWeight:700, textDecoration:"none", color:"#fff", borderRadius:"12px", background:"#d97706", display:"flex", alignItems:"center", gap:"6px", boxShadow:"0 4px 14px rgba(217,119,6,0.35)", transition:"background .15s" }}
+                  <Link href="/auth/signup" className="desktop-only"
+                    style={{ alignItems:"center", gap:"6px", padding:"9px 20px", fontSize:"13px", fontWeight:700, textDecoration:"none", color:"#fff", borderRadius:"12px", background:"#d97706", boxShadow:"0 4px 14px rgba(217,119,6,0.35)", transition:"background .15s" }}
                     onMouseEnter={(e) => (e.currentTarget.style.background="#b45309")}
                     onMouseLeave={(e) => (e.currentTarget.style.background="#d97706")}
                   >Get Started <ArrowRight size={13} /></Link>
@@ -254,7 +332,7 @@ export default function ShopPage() {
 
               {/* Mobile hamburger */}
               <button className="mobile-menu-btn" onClick={() => setMobileNavOpen((v) => !v)}
-                style={{ display:"flex", alignItems:"center", justifyContent:"center", width:"38px", height:"38px", borderRadius:"10px", border:"1.5px solid rgba(0,0,0,0.12)", background:"transparent", cursor:"pointer", marginLeft:"4px" }}
+                style={{ display:"flex", alignItems:"center", justifyContent:"center", width:"38px", height:"38px", borderRadius:"10px", border:"1.5px solid rgba(0,0,0,0.12)", background:"transparent", cursor:"pointer" }}
                 aria-label="Toggle menu">
                 {mobileNavOpen ? <X size={18} color="#1a1a2e" /> : <Menu size={18} color="#1a1a2e" />}
               </button>
@@ -263,32 +341,81 @@ export default function ShopPage() {
         </div>
       </header>
 
-      {/* ── Mobile Nav Overlay ── */}
+      {/* ── Mobile Nav Drawer ── */}
       {mobileNavOpen && (
-        <div className="mobile-nav">
-          <button onClick={() => setMobileNavOpen(false)} style={{ position:"absolute", top:"20px", right:"24px", display:"flex", alignItems:"center", justifyContent:"center", width:"38px", height:"38px", borderRadius:"10px", border:"1.5px solid rgba(0,0,0,0.12)", background:"transparent", cursor:"pointer" }}>
-            <X size={18} color="#1a1a2e" />
-          </button>
-          <Link href="/shop" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#d97706", textDecoration:"none", letterSpacing:"-0.5px" }}>Shop</Link>
-          <Link href="/services" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#1a1a2e", textDecoration:"none", letterSpacing:"-0.5px" }}>Services</Link>
-          <Link href="/contact" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#1a1a2e", textDecoration:"none", letterSpacing:"-0.5px" }}>Contact</Link>
-          <Link href="/about" onClick={() => setMobileNavOpen(false)} style={{ fontFamily:"'Outfit',sans-serif", fontSize:"28px", fontWeight:700, color:"#1a1a2e", textDecoration:"none", letterSpacing:"-0.5px" }}>About</Link>
-          <div style={{ display:"flex", gap:"12px", marginTop:"8px" }}>
-            {!user && (
-              <>
-                <Link href="/auth/signin" onClick={() => setMobileNavOpen(false)} style={{ padding:"11px 24px", fontSize:"14px", fontWeight:600, textDecoration:"none", color:"#374151", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.15)" }}>Sign In</Link>
-                <Link href="/auth/signup" onClick={() => setMobileNavOpen(false)} style={{ padding:"11px 24px", fontSize:"14px", fontWeight:700, textDecoration:"none", color:"#fff", borderRadius:"12px", background:"#d97706" }}>Get Started</Link>
-              </>
-            )}
+        <>
+          <div className="mobile-nav-backdrop" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
+          <div className="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
+            <div className="mobile-nav-header">
+              <Link href="/" onClick={() => setMobileNavOpen(false)} style={{ display:"flex", alignItems:"center", gap:"8px", textDecoration:"none" }}>
+                <span style={{ width:"28px", height:"28px", borderRadius:"7px", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <Triangle size={12} color="#fff" fill="#fff" />
+                </span>
+                <span className="brand" style={{ color:"#1a1a2e", fontSize:"18px", fontWeight:800 }}>EMEREN</span>
+              </Link>
+              <button onClick={() => setMobileNavOpen(false)} style={{ display:"flex", alignItems:"center", justifyContent:"center", width:"36px", height:"36px", borderRadius:"10px", border:"1.5px solid rgba(0,0,0,0.1)", background:"transparent", cursor:"pointer" }} aria-label="Close menu">
+                <X size={17} color="#374151" />
+              </button>
+            </div>
+
             {user && (
-              <button onClick={() => { handleSignOut(); setMobileNavOpen(false); }} style={{ padding:"11px 24px", fontSize:"14px", fontWeight:600, border:"1.5px solid rgba(239,68,68,0.3)", color:"#ef4444", borderRadius:"12px", background:"transparent", cursor:"pointer" }}>Sign Out</button>
+              <div style={{ margin:"12px 20px 4px", padding:"12px 14px", borderRadius:"12px", background:"rgba(217,119,6,0.06)", border:"1px solid rgba(217,119,6,0.15)", display:"flex", alignItems:"center", gap:"10px" }}>
+                <div style={{ width:"36px", height:"36px", borderRadius:"50%", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <User size={16} color="#fff" />
+                </div>
+                <div style={{ minWidth:0 }}>
+                  <p style={{ fontSize:"12px", color:"#9ca3af", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.04em", margin:0 }}>Signed in as</p>
+                  <p style={{ fontSize:"13px", fontWeight:700, color:"#1a1a2e", margin:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.email}</p>
+                </div>
+              </div>
             )}
+
+            <nav className="mobile-nav-links">
+              {([
+                { label:"Shop",     href:"/shop",     icon:<Wind size={16} color="#d97706" /> },
+                { label:"Services", href:"/services", icon:<Zap size={16} color="#d97706" /> },
+                { label:"About",    href:"/about",    icon:<Building2 size={16} color="#d97706" /> },
+                { label:"Contact",  href:"/contact",  icon:<Package size={16} color="#d97706" /> },
+              ]).map(({ label, href, icon }) => (
+                <Link key={label} href={href} className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
+                  <span className="link-icon">{icon}</span>{label}
+                </Link>
+              ))}
+              {user && (
+                <>
+                  <div className="mobile-nav-divider" />
+                  <Link href="/profile" className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
+                    <span className="link-icon"><User size={16} color="#d97706" /></span>My Profile
+                  </Link>
+                </>
+              )}
+            </nav>
+
+            <div className="mobile-nav-footer">
+              {!user ? (
+                <>
+                  <Link href="/auth/signup" onClick={() => setMobileNavOpen(false)}
+                    style={{ padding:"13px 20px", fontSize:"14px", fontWeight:700, textDecoration:"none", color:"#fff", borderRadius:"12px", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center", gap:"7px", boxShadow:"0 4px 14px rgba(217,119,6,0.35)" }}>
+                    Get Started <ArrowRight size={14} />
+                  </Link>
+                  <Link href="/auth/signin" onClick={() => setMobileNavOpen(false)}
+                    style={{ padding:"12px 20px", fontSize:"14px", fontWeight:600, textDecoration:"none", color:"#374151", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.12)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                    Sign In
+                  </Link>
+                </>
+              ) : (
+                <button onClick={() => { handleSignOut(); setMobileNavOpen(false); }}
+                  style={{ width:"100%", padding:"13px 20px", fontSize:"14px", fontWeight:600, border:"1.5px solid rgba(239,68,68,0.25)", color:"#ef4444", borderRadius:"12px", background:"rgba(239,68,68,0.04)", cursor:"pointer", fontFamily:"'Plus Jakarta Sans',sans-serif", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
+                  <LogOut size={15} /> Sign Out
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* ── Page hero ── */}
-      <div style={{ paddingTop:"100px", paddingBottom:"40px", paddingLeft:"24px", paddingRight:"24px", maxWidth:"1280px", margin:"0 auto" }}>
+      <div className="page-hero" style={{ paddingTop:"210px", paddingBottom:"40px", paddingLeft:"24px", paddingRight:"24px", maxWidth:"1280px", margin:"0 auto" }}>
         <p style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", color:"#d97706", marginBottom:"10px", fontFamily:"'Outfit',sans-serif" }}>Our Collection</p>
         <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", flexWrap:"wrap", gap:"12px" }}>
           <h1 className="outfit" style={{ fontSize:"clamp(28px,5vw,48px)", fontWeight:900, letterSpacing:"-1.5px", color:"#1a1a2e", lineHeight:1.1 }}>All Products</h1>
@@ -299,11 +426,11 @@ export default function ShopPage() {
       </div>
 
       {/* ── Toolbar ── */}
-      <div style={{ position:"sticky", top:"68px", zIndex:40, background:"rgba(248,247,244,0.95)", backdropFilter:"blur(12px)", borderBottom:"1px solid rgba(0,0,0,0.06)", padding:"14px 24px" }}>
+      <div style={{ position:"fixed", top:"68px", left:0, right:0, zIndex:40, background:"rgba(248,247,244,0.95)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", borderBottom:"1px solid rgba(0,0,0,0.06)", padding:"14px 24px" }}>
         <div style={{ maxWidth:"1280px", margin:"0 auto", display:"flex", flexDirection:"column", gap:"12px" }}>
-          <div style={{ display:"flex", gap:"10px", alignItems:"center" }}>
+          <div className="toolbar-row" style={{ display:"flex", gap:"10px", alignItems:"center" }}>
             {/* Search */}
-            <div style={{ position:"relative", flex:1, maxWidth:"360px" }}>
+            <div className="toolbar-search" style={{ position:"relative", flex:1, maxWidth:"360px" }}>
               <Search size={15} color="#9ca3af" style={{ position:"absolute", left:"13px", top:"50%", transform:"translateY(-50%)" }} />
               <input className="search-input" placeholder="Search by brand or series..." value={search} onChange={(e) => setSearch(e.target.value)} />
               {search && (
@@ -322,7 +449,7 @@ export default function ShopPage() {
                 )}
               </button>
               {filterOpen && (
-                <div className="filter-panel" style={{ position:"absolute", top:"calc(100% + 8px)", left:0, zIndex:100, width:"280px" }}>
+                <div className="filter-panel filter-panel-dropdown" style={{ position:"absolute", top:"calc(100% + 8px)", left:0, zIndex:100, width:"280px" }}>
                   <p style={{ fontSize:"12px", fontWeight:700, color:"#1a1a2e", marginBottom:"14px", fontFamily:"'Outfit',sans-serif", letterSpacing:"0.05em", textTransform:"uppercase" }}>Brand</p>
                   <div style={{ display:"flex", flexDirection:"column", gap:"6px", marginBottom:"20px" }}>
                     {BRANDS.map((b) => (
@@ -360,7 +487,7 @@ export default function ShopPage() {
                 <ChevronDown size={13} style={{ transition:"transform .2s", transform: sortOpen ? "rotate(180deg)" : "rotate(0deg)" }} />
               </button>
               {sortOpen && (
-                <div className="dropdown" style={{ position:"absolute", top:"calc(100% + 8px)", right:0, zIndex:100 }}>
+                <div className="dropdown sort-dropdown" style={{ position:"absolute", top:"calc(100% + 8px)", right:0, zIndex:100 }}>
                   {SORT_OPTIONS.map((opt) => (
                     <div key={opt} className={`dropdown-item ${sort===opt ? "selected" : ""}`} onClick={() => { setSort(opt); setSortOpen(false); }}>
                       {sort===opt && <span style={{ marginRight:"6px" }}>✓</span>}{opt}
@@ -411,7 +538,7 @@ export default function ShopPage() {
             </button>
           </div>
         ) : (
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:"20px" }}>
+          <div className="product-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:"20px" }}>
             {filtered.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
           </div>
         )}
@@ -419,7 +546,7 @@ export default function ShopPage() {
 
       {/* ── Footer ── */}
       <footer style={{ borderTop:"1px solid rgba(0,0,0,0.07)", padding:"40px 24px", background:"#fff" }}>
-        <div style={{ maxWidth:"1280px", margin:"0 auto", display:"flex", flexWrap:"wrap", justifyContent:"space-between", alignItems:"center", gap:"16px" }}>
+        <div className="footer-inner" style={{ maxWidth:"1280px", margin:"0 auto", display:"flex", flexWrap:"wrap", justifyContent:"space-between", alignItems:"center", gap:"16px" }}>
           <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
             <span style={{ width:"26px", height:"26px", borderRadius:"7px", background:"#d97706", display:"flex", alignItems:"center", justifyContent:"center" }}>
               <Triangle size={11} color="#fff" fill="#fff" />
@@ -454,7 +581,7 @@ function ProductCard({ product: p, index: i }: { product: Product; index: number
       <div className="product-card" style={{ animationDelay:`${i * 0.05}s` }}>
 
         {/* Image area */}
-        <div style={{ height:"190px", position:"relative", overflow:"hidden", background:"linear-gradient(145deg,#f0ede8 0%,#f8f7f4 50%,#ede9e2 100%)" }}>
+        <div className="card-img" style={{ height:"190px", position:"relative", overflow:"hidden", background:"linear-gradient(145deg,#f0ede8 0%,#f8f7f4 50%,#ede9e2 100%)" }}>
           <div style={{ position:"absolute", top:"-30px", right:"-30px", width:"130px", height:"130px", borderRadius:"50%", background:"rgba(217,119,6,0.06)", pointerEvents:"none" }} />
           <div style={{ position:"absolute", bottom:"-20px", left:"-20px", width:"90px", height:"90px", borderRadius:"50%", background:"rgba(217,119,6,0.04)", pointerEvents:"none" }} />
 
@@ -493,9 +620,9 @@ function ProductCard({ product: p, index: i }: { product: Product; index: number
         </div>
 
         {/* Info */}
-        <div style={{ padding:"16px" }}>
+        <div className="card-body" style={{ padding:"16px" }}>
           <p style={{ color:"#9ca3af", fontSize:"10px", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em", margin:"0 0 2px" }}>{p.brand}</p>
-          <h3 style={{ color:"#1a1a2e", fontSize:"15px", fontWeight:700, margin:"0 0 10px", lineHeight:1.3 }}>{p.brand} {p.series}</h3>
+          <h3 className="card-title" style={{ color:"#1a1a2e", fontSize:"15px", fontWeight:700, margin:"0 0 10px", lineHeight:1.3 }}>{p.brand} {p.series}</h3>
 
           {/* HP variant pills */}
           <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginBottom:"12px" }}>
@@ -516,7 +643,7 @@ function ProductCard({ product: p, index: i }: { product: Product; index: number
             <div>
               <p style={{ fontSize:"10px", color:"#9ca3af", margin:"0 0 1px" }}>Starting at</p>
               <div style={{ display:"flex", alignItems:"baseline", gap:"5px" }}>
-                <span className="outfit" style={{ fontSize:"18px", fontWeight:800, color:"#1a1a2e" }}>{formatPrice(lowestPrice)}</span>
+                <span className="outfit card-price" style={{ fontSize:"18px", fontWeight:800, color:"#1a1a2e" }}>{formatPrice(lowestPrice)}</span>
                 <span style={{ fontSize:"11px", color:"#d1d5db", textDecoration:"line-through" }}>{formatPrice(lowestOrig)}</span>
               </div>
             </div>

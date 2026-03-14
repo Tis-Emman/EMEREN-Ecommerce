@@ -46,7 +46,7 @@ export const ALL_PRODUCTS: Product[] = [
       "Technology": "DC Inverter",
       "Refrigerant": "R-32",
       "Voltage": "220V / 60Hz",
-      "Warranty": "5 yrs compressor, 1 yr parts",
+      "Warranty": "10 yrs compressor, 5 yr parts",
     },
     variants: [
       { hp: "1.0HP", price: 21000, orig: 25000, btu: "9K BTU",  sqm: "~16m²", tag: "Inverter" },

@@ -187,32 +187,124 @@ export default function LandingPage() {
         .reveal { opacity:0; transform:translateY(20px); transition: opacity .6s ease, transform .6s ease; }
         .reveal.visible { opacity:1; transform:translateY(0); }
 
-        .mobile-nav {
+        /* ── Mobile Nav Drawer ── */
+        .mobile-nav-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(248,247,244,0.97);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          z-index: 40;
+          background: rgba(0,0,0,0.35);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          z-index: 45;
+          animation: fadeIn .2s ease both;
+        }
+
+        .mobile-nav {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          width: min(320px, 88vw);
+          background: #faf9f6;
+          z-index: 50;
           display: flex;
           flex-direction: column;
+          box-shadow: -8px 0 40px rgba(0,0,0,0.14);
+          animation: slideInRight .25s cubic-bezier(.22,1,.36,1) both;
+          overflow-y: auto;
+        }
+
+        @keyframes slideInRight {
+          from { transform: translateX(100%); }
+          to   { transform: translateX(0); }
+        }
+
+        .mobile-nav-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 18px 20px 16px;
+          border-bottom: 1px solid rgba(0,0,0,0.07);
+          flex-shrink: 0;
+        }
+
+        .mobile-nav-links {
+          flex: 1;
+          padding: 8px 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .mobile-nav-link {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 13px 12px;
+          border-radius: 12px;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 15px;
+          font-weight: 600;
+          color: #374151;
+          text-decoration: none;
+          transition: background .15s, color .15s;
+          cursor: pointer;
+          background: none;
+          border: none;
+          width: 100%;
+          text-align: left;
+        }
+
+        .mobile-nav-link:hover {
+          background: rgba(217,119,6,0.07);
+          color: #d97706;
+        }
+
+        .mobile-nav-link .link-icon {
+          width: 34px;
+          height: 34px;
+          border-radius: 9px;
+          background: rgba(0,0,0,0.04);
+          display: flex;
           align-items: center;
           justify-content: center;
-          gap: 32px;
+          flex-shrink: 0;
+          transition: background .15s;
         }
-        .mobile-nav a {
-          font-family: 'Outfit', sans-serif;
-          font-size: 28px;
-          font-weight: 700;
-          color: #1a1a2e;
-          text-decoration: none;
-          letter-spacing: -0.5px;
-          transition: color .2s;
+
+        .mobile-nav-link:hover .link-icon {
+          background: rgba(217,119,6,0.12);
         }
-        .mobile-nav a:hover { color: #d97706; }
+
+        .mobile-nav-footer {
+          padding: 16px 20px 28px;
+          border-top: 1px solid rgba(0,0,0,0.07);
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          flex-shrink: 0;
+        }
+
+        .mobile-nav-divider {
+          height: 1px;
+          background: rgba(0,0,0,0.06);
+          margin: 4px 12px;
+        }
+
+        .desktop-only { display: none !important; }
+
+        .nav-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
 
         @media (min-width: 768px) {
+          .desktop-only { display: flex !important; }
           .mobile-menu-btn { display: none !important; }
+          .nav-bar {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+          }
         }
       `}</style>
 
@@ -318,14 +410,13 @@ export default function LandingPage() {
           }}
         >
           <div
+            className="nav-bar"
             style={{
               maxWidth: "1200px",
               margin: "0 auto",
               padding: "0 24px",
               height: "68px",
-              display: "grid",
-              gridTemplateColumns: "1fr auto 1fr",
-              alignItems: "center",
+              gap: "16px",
             }}
           >
             {/* Logo */}
@@ -355,10 +446,10 @@ export default function LandingPage() {
               </span>
             </Link>
 
-            {/* Nav links — desktop */}
+            {/* Nav links — desktop only */}
             <nav
-              style={{ display: "flex", alignItems: "center", gap: "28px", justifyContent: "center" }}
-              className="hidden md:flex"
+              className="desktop-only"
+              style={{ alignItems: "center", gap: "28px", justifyContent: "center" }}
             >
               {[
                 { label: "Shop",     href: "/shop" },
@@ -379,13 +470,14 @@ export default function LandingPage() {
               ))}
             </nav>
 
-            {/* Auth buttons */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
+            {/* Auth buttons + hamburger */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "flex-end" }}>
               {user ? (
                 <div style={{ position: "relative" }} ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen((v) => !v)}
-                    style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", maxWidth: "200px" }}
+                    className="desktop-only"
+                    style={{ alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", maxWidth: "200px" }}
                   >
                     <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <User size={13} color="#fff" />
@@ -432,15 +524,15 @@ export default function LandingPage() {
                 <>
                   <Link
                     href="/auth/signin"
-                    className="ghost-btn hidden sm:flex"
-                    style={{ padding: "8px 18px", fontSize: "13px", fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center" }}
+                    className="ghost-btn desktop-only"
+                    style={{ padding: "8px 18px", fontSize: "13px", fontWeight: 600, textDecoration: "none", alignItems: "center" }}
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/auth/signup"
-                    className="cta-btn"
-                    style={{ padding: "9px 20px", fontSize: "13px", textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}
+                    className="cta-btn desktop-only"
+                    style={{ padding: "9px 20px", fontSize: "13px", textDecoration: "none", alignItems: "center", gap: "6px" }}
                   >
                     Get Started
                     <ArrowRight size={13} />
@@ -448,11 +540,11 @@ export default function LandingPage() {
                 </>
               )}
 
-              {/* Mobile hamburger */}
+              {/* Mobile hamburger — always visible on mobile */}
               <button
                 className="mobile-menu-btn"
                 onClick={() => setMobileNavOpen((v) => !v)}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer", marginLeft: "4px" }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer" }}
                 aria-label="Toggle menu"
               >
                 {mobileNavOpen ? <X size={18} color="#1a1a2e" /> : <Menu size={18} color="#1a1a2e" />}
@@ -462,34 +554,122 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── Mobile Nav Overlay ── */}
+      {/* ── Mobile Nav Drawer ── */}
       {mobileNavOpen && (
-        <div className="mobile-nav">
-          <button
+        <>
+          {/* Backdrop */}
+          <div
+            className="mobile-nav-backdrop"
             onClick={() => setMobileNavOpen(false)}
-            style={{ position: "absolute", top: "20px", right: "24px", display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer" }}
-            aria-label="Close menu"
-          >
-            <X size={18} color="#1a1a2e" />
-          </button>
-          <a href="/shop" onClick={() => setMobileNavOpen(false)}>Shop</a>
-          <a href="/services" onClick={() => setMobileNavOpen(false)}>Services</a>
-          <a href="/contact" onClick={() => setMobileNavOpen(false)}>Contact</a>
-          <a href="/about" onClick={() => setMobileNavOpen(false)}>About</a>
-          <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
-            {!user && (
-              <>
-                <Link href="/auth/signin" className="ghost-btn" onClick={() => setMobileNavOpen(false)} style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, textDecoration: "none" }}>Sign In</Link>
-                <Link href="/auth/signup" className="cta-btn" onClick={() => setMobileNavOpen(false)} style={{ padding: "11px 24px", fontSize: "14px", textDecoration: "none" }}>Get Started</Link>
-              </>
-            )}
-            {user && (
-              <button onClick={() => { handleSignOut(); setMobileNavOpen(false); }} className="ghost-btn" style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, border: "1.5px solid rgba(239,68,68,0.3)", color: "#ef4444", borderRadius: "12px", background: "transparent", cursor: "pointer" }}>
-                Sign Out
+            aria-hidden="true"
+          />
+
+          {/* Drawer */}
+          <div className="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
+
+            {/* Header */}
+            <div className="mobile-nav-header">
+              <Link
+                href="/"
+                onClick={() => setMobileNavOpen(false)}
+                style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}
+              >
+                <span style={{ width: "28px", height: "28px", borderRadius: "7px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Triangle size={12} color="#fff" fill="#fff" />
+                </span>
+                <span className="brand" style={{ color: "#1a1a2e", fontSize: "18px", fontWeight: 800, letterSpacing: "-0.5px" }}>EMEREN</span>
+              </Link>
+              <button
+                onClick={() => setMobileNavOpen(false)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.1)", background: "transparent", cursor: "pointer" }}
+                aria-label="Close menu"
+              >
+                <X size={17} color="#374151" />
               </button>
+            </div>
+
+            {/* User info (if signed in) */}
+            {user && (
+              <div style={{ margin: "12px 20px 4px", padding: "12px 14px", borderRadius: "12px", background: "rgba(217,119,6,0.06)", border: "1px solid rgba(217,119,6,0.15)", display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <User size={16} color="#fff" />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: "12px", color: "#9ca3af", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", margin: 0 }}>Signed in as</p>
+                  <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</p>
+                </div>
+              </div>
             )}
+
+            {/* Nav links */}
+            <nav className="mobile-nav-links">
+              {[
+                { label: "Shop",     href: "/shop",     icon: <Smartphone size={16} color="#d97706" /> },
+                { label: "Services", href: "/services", icon: <Wrench size={16} color="#d97706" /> },
+                { label: "About",    href: "/about",    icon: <Shield size={16} color="#d97706" /> },
+                { label: "Contact",  href: "/contact",  icon: <MessageCircle size={16} color="#d97706" /> },
+              ].map(({ label, href, icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  className="mobile-nav-link"
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  <span className="link-icon">{icon}</span>
+                  {label}
+                </a>
+              ))}
+
+              {user && (
+                <>
+                  <div className="mobile-nav-divider" />
+                  <Link
+                    href="/profile"
+                    className="mobile-nav-link"
+                    onClick={() => setMobileNavOpen(false)}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <span className="link-icon"><User size={16} color="#d97706" /></span>
+                    My Profile
+                  </Link>
+                </>
+              )}
+            </nav>
+
+            {/* Footer CTA */}
+            <div className="mobile-nav-footer">
+              {!user ? (
+                <>
+                  <Link
+                    href="/auth/signup"
+                    className="cta-btn"
+                    onClick={() => setMobileNavOpen(false)}
+                    style={{ padding: "13px 20px", fontSize: "14px", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "7px", borderRadius: "12px" }}
+                  >
+                    Get Started <ArrowRight size={14} />
+                  </Link>
+                  <Link
+                    href="/auth/signin"
+                    className="ghost-btn"
+                    onClick={() => setMobileNavOpen(false)}
+                    style={{ padding: "12px 20px", fontSize: "14px", fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "12px" }}
+                  >
+                    Sign In
+                  </Link>
+                </>
+              ) : (
+                <button
+                  onClick={() => { handleSignOut(); setMobileNavOpen(false); }}
+                  style={{ width: "100%", padding: "13px 20px", fontSize: "14px", fontWeight: 600, border: "1.5px solid rgba(239,68,68,0.25)", color: "#ef4444", borderRadius: "12px", background: "rgba(239,68,68,0.04)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", transition: "background .15s" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.08)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.04)")}
+                >
+                  <LogOut size={15} /> Sign Out
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* ── Hero ── */}
