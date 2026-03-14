@@ -93,7 +93,7 @@ export const ALL_PRODUCTS: Product[] = [
   {
     id: "samsung",
     brand: "Samsung",
-    series: "Wind-Free",
+    series: "",
     type: "Split-Type",
     badge: "New",
     rating: 4.8,
@@ -182,7 +182,38 @@ export const ALL_PRODUCTS: Product[] = [
       "Warranty": "2 yrs compressor, 1 yr parts",
     },
     variants: [
-      { hp: "0.75HP", price: 12500, orig: 15000, btu: "7K BTU",  sqm: "~12m²", tag: "Standard" },
+      { hp: "1.0HP",  price: 15000, orig: 18000, btu: "9K BTU",  sqm: "~16m²", tag: "Standard" },
+      { hp: "1.5HP",  price: 19000, orig: 23000, btu: "12K BTU", sqm: "~22m²", tag: "Standard" },
+      { hp: "2.0HP",  price: 24000, orig: 28000, btu: "18K BTU", sqm: "~30m²", tag: "Standard" },
+    ],
+  },
+
+  {
+    id: "carrier",
+    brand: "Carrier",
+    series: "",
+    type: "Split-Type",
+    badge: "Popular",
+    rating: 4.5,
+    reviews: 534,
+    description: "Carrier split-type air conditioners — a trusted choice in the Philippines for reliable cooling. Known for durable performance, energy efficiency, and a strong nationwide service network.",
+    features: [
+      "Standard rotary compressor",
+      "Auto mode, Cool, Fan, Dry",
+      "Easy-clean washable filter",
+      "Sleep timer",
+      "Auto restart",
+      "Corrosion-resistant outdoor unit",
+      "Wide service network in PH",
+    ],
+    specs: {
+      "Type": "Wall-Mounted Split-Type",
+      "Technology": "Standard (Non-Inverter)",
+      "Refrigerant": "R-22",
+      "Voltage": "220V / 60Hz",
+      "Warranty": "2 yrs compressor, 1 yr parts",
+    },
+    variants: [
       { hp: "1.0HP",  price: 15000, orig: 18000, btu: "9K BTU",  sqm: "~16m²", tag: "Standard" },
       { hp: "1.5HP",  price: 19000, orig: 23000, btu: "12K BTU", sqm: "~22m²", tag: "Standard" },
       { hp: "2.0HP",  price: 24000, orig: 28000, btu: "18K BTU", sqm: "~30m²", tag: "Standard" },
@@ -253,14 +284,14 @@ export const ALL_PRODUCTS: Product[] = [
 
   // ── Daikin VRF ──────────────────────────────────────
   {
-    id: "daikin-vrf",
-    brand: "Daikin",
-    series: "VRV-S",
-    type: "VRF/Ducted",
+    id: "midea",
+    brand: "Midea",
+    series: "",
+    type: "Split-Type",
     badge: "Premium",
     rating: 5.0,
     reviews: 38,
-    description: "Daikin VRV-S is the gold standard for large-scale commercial climate control. Multi-zone, heat-recovery capable, and BMS-ready for full building integration.",
+    description: "Midea VRF systems are a leading solution for large-scale commercial climate control. Multi-zone capable, energy-efficient, and BMS-ready for seamless building integration and centralized management.",
     features: [
       "Multi-zone (up to 13 indoor units)",
       "Heat recovery option",
@@ -277,9 +308,9 @@ export const ALL_PRODUCTS: Product[] = [
       "Warranty": "5 yrs compressor, 2 yrs parts",
     },
     variants: [
-      { hp: "8HP",  price: 185000, orig: 210000, btu: "72K BTU",  sqm: "~120m²", tag: "Inverter" },
-      { hp: "10HP", price: 235000, orig: 265000, btu: "90K BTU",  sqm: "~160m²", tag: "Inverter" },
-      { hp: "12HP", price: 280000, orig: 320000, btu: "108K BTU", sqm: "~200m²", tag: "Inverter" },
+      { hp: "1HP",  price: 185000, orig: 210000, btu: "72K BTU",  sqm: "~120m²", tag: "Inverter" },
+      { hp: "1.5HP", price: 235000, orig: 265000, btu: "90K BTU",  sqm: "~160m²", tag: "Inverter" },
+      { hp: "2HP", price: 280000, orig: 320000, btu: "108K BTU", sqm: "~200m²", tag: "Inverter" },
     ],
   },
 ];

@@ -132,7 +132,7 @@ export default function ProductPage() {
               <span className="brand" style={{ color:"#1a1a2e", fontSize:"20px", fontWeight:800 }}>EMEREN</span>
             </Link>
             <nav style={{ display:"flex", alignItems:"center", gap:"32px" }}>
-              {[["Products","/shop"],["Services","/services"],["About","/#about"],["Contact","/#contact"]].map(([label,href]) => (
+              {[["Products","/shop"],["Services","/services"],["About","/about"],["Contact","/#contact"]].map(([label,href]) => (
                 <Link key={label} href={href} className="nav-link"
                   style={{ color:"#6b7280", fontSize:"14px", fontWeight:500, textDecoration:"none", transition:"color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color="#1a1a2e")}

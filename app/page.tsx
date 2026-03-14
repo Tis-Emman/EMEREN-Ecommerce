@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   ChevronDown,
@@ -17,14 +16,17 @@ import {
   Triangle,
   User,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 export default function LandingPage() {
-  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -37,18 +39,50 @@ export default function LandingPage() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Close user dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [userMenuOpen]);
+
+  // Close mobile nav on resize to desktop
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth >= 768) setMobileNavOpen(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
     setUser(null);
     setUserMenuOpen(false);
   };
-  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Wire up reveal animation via IntersectionObserver
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      }),
+      { threshold: 0.15 }
+    );
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -151,6 +185,34 @@ export default function LandingPage() {
 
         .reveal { opacity:0; transform:translateY(20px); transition: opacity .6s ease, transform .6s ease; }
         .reveal.visible { opacity:1; transform:translateY(0); }
+
+        .mobile-nav {
+          position: fixed;
+          inset: 0;
+          background: rgba(248,247,244,0.97);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          z-index: 40;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 32px;
+        }
+        .mobile-nav a {
+          font-family: 'Outfit', sans-serif;
+          font-size: 28px;
+          font-weight: 700;
+          color: #1a1a2e;
+          text-decoration: none;
+          letter-spacing: -0.5px;
+          transition: color .2s;
+        }
+        .mobile-nav a:hover { color: #d97706; }
+
+        @media (min-width: 768px) {
+          .mobile-menu-btn { display: none !important; }
+        }
       `}</style>
 
       {/* ── Background aurora ── */}
@@ -263,12 +325,13 @@ export default function LandingPage() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
+              gap: "16px",
             }}
           >
             {/* Logo */}
             <Link
               href="/"
-              style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}
+              style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none", flexShrink: 0 }}
             >
               <span
                 style={{
@@ -286,7 +349,7 @@ export default function LandingPage() {
               </span>
               <span
                 className="brand"
-                style={{ color: "#1a1a2e", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.5px" }}
+                style={{ color: "#1a1a2e", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.5px", whiteSpace: "nowrap" }}
               >
                 EMEREN
               </span>
@@ -294,19 +357,23 @@ export default function LandingPage() {
 
             {/* Nav links — desktop */}
             <nav
-              style={{ display: "flex", alignItems: "center", gap: "32px" }}
+              style={{ display: "flex", alignItems: "center", gap: "28px", flex: 1, justifyContent: "center" }}
               className="hidden md:flex"
             >
-              {["Features", "About", "Contact"].map((n) => (
+              {[
+                { label: "Features", href: "/#features" },
+                { label: "About",    href: "/about" },
+                { label: "Contact",  href: "/contact" },
+              ].map(({ label, href }) => (
                 <a
-                  key={n}
-                  href={`#${n.toLowerCase()}`}
+                  key={label}
+                  href={href}
                   className="nav-link"
                   style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
                 >
-                  {n}
+                  {label}
                 </a>
               ))}
               <Link href="/shop" className="nav-link"
@@ -322,17 +389,17 @@ export default function LandingPage() {
             </nav>
 
             {/* Auth buttons */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
               {user ? (
-                <div style={{ position: "relative" }}>
+                <div style={{ position: "relative" }} ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen((v) => !v)}
-                    style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif", maxWidth: "200px" }}
                   >
-                    <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <User size={13} color="#fff" />
                     </div>
-                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e", maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e", maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {user.email.split("@")[0]}
                     </span>
                   </button>
@@ -389,16 +456,54 @@ export default function LandingPage() {
                   </Link>
                 </>
               )}
+
+              {/* Mobile hamburger */}
+              <button
+                className="mobile-menu-btn"
+                onClick={() => setMobileNavOpen((v) => !v)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer", marginLeft: "4px" }}
+                aria-label="Toggle menu"
+              >
+                {mobileNavOpen ? <X size={18} color="#1a1a2e" /> : <Menu size={18} color="#1a1a2e" />}
+              </button>
             </div>
           </div>
-
-
         </div>
       </header>
 
+      {/* ── Mobile Nav Overlay ── */}
+      {mobileNavOpen && (
+        <div className="mobile-nav">
+          <button
+            onClick={() => setMobileNavOpen(false)}
+            style={{ position: "absolute", top: "20px", right: "24px", display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer" }}
+            aria-label="Close menu"
+          >
+            <X size={18} color="#1a1a2e" />
+          </button>
+          <a href="/#features" onClick={() => setMobileNavOpen(false)}>Features</a>
+          <a href="/about" onClick={() => setMobileNavOpen(false)}>About</a>
+          <a href="/contact" onClick={() => setMobileNavOpen(false)}>Contact</a>
+          <Link href="/shop" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Shop</Link>
+          <Link href="/services" onClick={() => setMobileNavOpen(false)} style={{ fontFamily: "'Outfit', sans-serif", fontSize: "28px", fontWeight: 700, color: "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>Services</Link>
+          <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+            {!user && (
+              <>
+                <Link href="/auth/signin" className="ghost-btn" onClick={() => setMobileNavOpen(false)} style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, textDecoration: "none" }}>Sign In</Link>
+                <Link href="/auth/signup" className="cta-btn" onClick={() => setMobileNavOpen(false)} style={{ padding: "11px 24px", fontSize: "14px", textDecoration: "none" }}>Get Started</Link>
+              </>
+            )}
+            {user && (
+              <button onClick={() => { handleSignOut(); setMobileNavOpen(false); }} className="ghost-btn" style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, border: "1.5px solid rgba(239,68,68,0.3)", color: "#ef4444", borderRadius: "12px", background: "transparent", cursor: "pointer" }}>
+                Sign Out
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Hero ── */}
       <section
-        ref={heroRef}
         style={{ position: "relative", zIndex: 1, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "120px 24px 80px" }}
       >
         <div style={{ maxWidth: "820px", margin: "0 auto", textAlign: "center" }}>
@@ -519,7 +624,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── Stats ── */}
-      <section style={{ position: "relative", zIndex: 1, padding: "80px 24px" }}>
+      <section className="reveal" style={{ position: "relative", zIndex: 1, padding: "80px 24px" }}>
         <div
           style={{ maxWidth: "1000px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "2px" }}
         >
@@ -547,7 +652,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ── */}
-      <section id="features" style={{ position: "relative", zIndex: 1, padding: "80px 24px 100px" }}>
+      <section id="features" className="reveal" style={{ position: "relative", zIndex: 1, padding: "80px 24px 100px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "56px" }}>
             <p
@@ -588,7 +693,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Featured Products ── */}
-      <section id="products" style={{ position: "relative", zIndex: 1, padding: "0 24px 100px" }}>
+      <section id="products" className="reveal" style={{ position: "relative", zIndex: 1, padding: "0 24px 100px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "40px" }}>
             <div>
@@ -631,7 +736,18 @@ export default function LandingPage() {
                   >
                     {p.badge}
                   </span>
-                  <div style={{ fontSize: "64px", filter: "drop-shadow(0 0 18px rgba(217,119,6,0.18))" }}>❄️</div>
+                  {/* SVG AC unit placeholder */}
+                  <svg width="110" height="72" viewBox="0 0 110 72" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 4px 16px rgba(217,119,6,0.15))" }}>
+                    <rect x="4" y="8" width="102" height="46" rx="8" fill="#fff" stroke="rgba(217,119,6,0.25)" strokeWidth="1.5"/>
+                    <rect x="12" y="16" width="86" height="30" rx="5" fill="#f8f7f4" stroke="rgba(0,0,0,0.07)" strokeWidth="1"/>
+                    <rect x="18" y="22" width="6" height="18" rx="2" fill="rgba(217,119,6,0.25)"/>
+                    <rect x="28" y="22" width="6" height="18" rx="2" fill="rgba(217,119,6,0.18)"/>
+                    <rect x="38" y="22" width="6" height="18" rx="2" fill="rgba(217,119,6,0.12)"/>
+                    <rect x="48" y="22" width="6" height="18" rx="2" fill="rgba(217,119,6,0.08)"/>
+                    <circle cx="85" cy="31" r="7" fill="rgba(217,119,6,0.12)" stroke="rgba(217,119,6,0.3)" strokeWidth="1"/>
+                    <circle cx="85" cy="31" r="3" fill="#d97706" opacity="0.6"/>
+                    <rect x="20" y="58" width="70" height="6" rx="3" fill="rgba(0,0,0,0.06)"/>
+                  </svg>
                 </div>
                 {/* Info */}
                 <div style={{ padding: "16px" }}>
@@ -762,35 +878,60 @@ export default function LandingPage() {
                 Premium air conditioning systems for Philippine homes and businesses.
               </p>
               <div style={{ display: "flex", gap: "10px" }}>
-                {["FB", "IG", "TW"].map((s) => (
-                  <div
-                    key={s}
-                    style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: "10px", fontWeight: 700, cursor: "pointer" }}
+                {[
+                  { label: "FB", href: "https://facebook.com" },
+                  { label: "IG", href: "https://instagram.com" },
+                  { label: "TW", href: "https://twitter.com" },
+                ].map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: "10px", fontWeight: 700, cursor: "pointer", textDecoration: "none", transition: "border-color .2s, color .2s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(217,119,6,0.4)"; e.currentTarget.style.color = "#d97706"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)"; e.currentTarget.style.color = "#9ca3af"; }}
                   >
-                    {s}
-                  </div>
+                    {s.label}
+                  </a>
                 ))}
               </div>
             </div>
 
             {/* Links */}
             {[
-              { title: "Products", links: ["Split-Type", "Cassette", "Ducted", "Portable", "Multi-Split"] },
-              { title: "Company", links: ["About Us", "Careers", "Press", "Contact"] },
-              { title: "Support", links: ["Installation", "Warranty", "Returns", "FAQ"] },
+              { title: "Products", links: [
+                { label: "Split-Type", href: "/shop?type=split" },
+                { label: "Cassette", href: "/shop?type=cassette" },
+                { label: "Ducted", href: "/shop?type=ducted" },
+                { label: "Portable", href: "/shop?type=portable" },
+                { label: "Multi-Split", href: "/shop?type=multi-split" },
+              ]},
+              { title: "Company", links: [
+                { label: "About Us", href: "/about" },
+                { label: "Careers", href: "/careers" },
+                { label: "Press", href: "/press" },
+                { label: "Contact", href: "/contact" },
+              ]},
+              { title: "Support", links: [
+                { label: "Installation", href: "/support/installation" },
+                { label: "Warranty", href: "/support/warranty" },
+                { label: "Returns", href: "/support/returns" },
+                { label: "FAQ", href: "/faq" },
+              ]},
             ].map((col) => (
               <div key={col.title}>
                 <p style={{ color: "#1a1a2e", fontSize: "13px", fontWeight: 700, marginBottom: "14px", letterSpacing: "0.03em" }}>{col.title}</p>
                 {col.links.map((l) => (
-                  <a
-                    key={l}
-                    href="#"
+                  <Link
+                    key={l.label}
+                    href={l.href}
                     style={{ display: "block", color: "#9ca3af", fontSize: "13px", marginBottom: "9px", textDecoration: "none", transition: "color .2s" }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = "#374151")}
                     onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
                   >
-                    {l}
-                  </a>
+                    {l.label}
+                  </Link>
                 ))}
               </div>
             ))}
@@ -799,18 +940,22 @@ export default function LandingPage() {
           <div
             style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "24px", display: "flex", flexWrap: "wrap", gap: "12px", justifyContent: "space-between", alignItems: "center" }}
           >
-            <p style={{ color: "#d1d5db", fontSize: "12px", margin: 0 }}>© 2025 Emeren. All rights reserved.</p>
+            <p style={{ color: "#d1d5db", fontSize: "12px", margin: 0 }}>© {new Date().getFullYear()} Emeren. All rights reserved.</p>
             <div style={{ display: "flex", gap: "20px" }}>
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((l) => (
-                <a
-                  key={l}
-                  href="#"
+              {[
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
+                { label: "Cookie Policy", href: "/cookies" },
+              ].map((l) => (
+                <Link
+                  key={l.label}
+                  href={l.href}
                   style={{ color: "#d1d5db", fontSize: "12px", textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#6b7280")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#d1d5db")}
                 >
-                  {l}
-                </a>
+                  {l.label}
+                </Link>
               ))}
             </div>
           </div>

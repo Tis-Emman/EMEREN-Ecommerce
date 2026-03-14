@@ -168,7 +168,7 @@ export const SERVICES: Service[] = [
     badge: null,
     location: "on-site",
     description:
-      "Need your aircon removed and not reinstalled? We carefully dismantle and recover the unit — ideal for unit replacement, renovation, or when you're moving out.",
+      "Need your aircon removed and not reinstalled? We carefully dismantle and recover the unit — ideal for unit replacement, renovation, or even when you're moving out.",
     includes: [
       "Safe removal of indoor unit",
       "Safe removal of outdoor unit",
