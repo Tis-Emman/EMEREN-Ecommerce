@@ -338,7 +338,7 @@ export default function PrivacyPolicyPage() {
             <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#d1d5db", display: "inline-block" }} />
             <span style={{ fontSize: "13px", color: "#9ca3af" }}>Updated: <strong style={{ color: "#4b5563" }}>June 2025</strong></span>
             <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#d1d5db", display: "inline-block" }} />
-            <span style={{ fontSize: "13px", color: "#9ca3af" }}>⚖️ <strong style={{ color: "#4b5563" }}>R.A. 10173 (DPA)</strong></span>
+            <span style={{ fontSize: "13px", color: "#9ca3af" }}><strong style={{ color: "#4b5563" }}>R.A. 10173 (DPA)</strong></span>
           </div>
         </div>
       </div>

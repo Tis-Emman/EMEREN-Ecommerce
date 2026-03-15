@@ -947,7 +947,7 @@ function RepairCard({ service: s, index: i, onBook }: { service: Service; index:
 
         <div style={{ display: "flex", paddingTop: "16px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
           <a onClick={() => onBook({ name: s.name, price: "Free Diagnosis" })} className="book-btn" style={{ flex: 1, justifyContent: "center", cursor: "pointer" }}>
-            <Phone size={14} /> Book via Messenger
+            <Phone size={14} /> Book now
           </a>
         </div>
       </div>
@@ -1290,7 +1290,7 @@ export default function ServicesPage() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "#d97706")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "#1a1a2e")}
             >
-              <Phone size={15} /> Book via Messenger
+              <Phone size={15} /> Book now
             </a>
           </div>
           <p style={{ fontSize: "16px", color: "#6b7280", maxWidth: "580px", lineHeight: 1.7, margin: 0 }}>

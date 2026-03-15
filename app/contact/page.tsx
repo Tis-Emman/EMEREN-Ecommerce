@@ -581,7 +581,7 @@ export default function ContactPage() {
                 </div>
               </div>
               <div style={{ padding: "16px 20px" }}>
-                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="ghost-btn" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "9px 16px", fontSize: "13px", fontWeight: 600, textDecoration: "none", width: "100%" }}>
+                <a href="https://www.google.com/maps/place/Emeren+Aircon+%26+Refrigeration+Parts+%26+Services/@14.9658865,120.9073764,17.25z/data=!4m6!3m5!1s0x3397001af00e9c79:0x8392e70f15210957!8m2!3d14.9660995!4d120.9051816!16s%2Fg%2F11s8kbs7bv?entry=ttu&g_ep=EgoyMDI2MDMxMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="ghost-btn" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "9px 16px", fontSize: "13px", fontWeight: 600, textDecoration: "none", width: "100%" }}>
                   <MapPin size={13} color="#374151" />
                   Get Directions
                 </a>
