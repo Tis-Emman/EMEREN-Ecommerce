@@ -89,9 +89,17 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormState("sending");
-    // Simulate API call — replace with your actual endpoint
-    await new Promise((r) => setTimeout(r, 1400));
-    setFormState("sent");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setFormState("sent");
+    } catch {
+      setFormState("error");
+    }
   };
 
   const inputStyle = (name: string) => ({
@@ -489,7 +497,19 @@ export default function ContactPage() {
               <h2 className="hero-title" style={{ fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, letterSpacing: "-0.5px", margin: 0, color: "#1a1a2e" }}>How can we help you?</h2>
             </div>
 
-            {formState === "sent" ? (
+            {formState === "error" ? (
+              <div style={{ textAlign: "center", padding: "48px 24px" }}>
+                <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(239,68,68,0.08)", border: "2px solid rgba(239,68,68,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 10v8M16 22h.01" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="16" cy="16" r="13" stroke="#ef4444" strokeWidth="2" />
+                  </svg>
+                </div>
+                <h3 className="hero-title" style={{ fontSize: "22px", fontWeight: 800, color: "#1a1a2e", margin: "0 0 10px" }}>Something went wrong</h3>
+                <p style={{ color: "#6b7280", fontSize: "14px", lineHeight: 1.7, margin: "0 0 28px" }}>We couldn't send your message. Please try again or contact us directly.</p>
+                <button onClick={() => setFormState("idle")} className="ghost-btn" style={{ padding: "10px 24px", fontSize: "13px", fontWeight: 600, cursor: "pointer", border: "1.5px solid rgba(0,0,0,0.15)" }}>Try Again</button>
+              </div>
+            ) : formState === "sent" ? (
               <div style={{ textAlign: "center", padding: "48px 24px" }}>
                 <div className="success-icon" style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(217,119,6,0.1)", border: "2px solid rgba(217,119,6,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
                   <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -571,22 +591,19 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Map placeholder */}
+            {/* Map */}
             <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "20px", overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-              <div style={{ height: "180px", background: "radial-gradient(ellipse at 40% 60%, rgba(217,119,6,0.12) 0%, #f8f7f4 70%)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                {/* Stylised map pin illustration */}
-                <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="60" cy="60" r="56" fill="rgba(217,119,6,0.06)" stroke="rgba(217,119,6,0.15)" strokeWidth="1" />
-                  <circle cx="60" cy="60" r="36" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.2)" strokeWidth="1" />
-                  <path d="M60 28C48.954 28 40 36.954 40 48c0 15 20 44 20 44s20-29 20-44c0-11.046-8.954-20-20-20z" fill="#d97706" opacity="0.9" />
-                  <circle cx="60" cy="47" r="7" fill="#fff" />
-                </svg>
-                <div style={{ position: "absolute", bottom: "12px", left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}>
-                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#9ca3af" }}>Baliuag, Bulacan, Philippines</span>
-                </div>
-              </div>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3854.4787791348845!2d120.90031068436424!3d14.966104630820446!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397001af00e9c79%3A0x8392e70f15210957!2sEmeren%20Aircon%20%26%20Refrigeration%20Parts%20%26%20Services!5e0!3m2!1sen!2sph!4v1773937329840!5m2!1sen!2sph"
+                width="100%"
+                height="220"
+                style={{ border: 0, display: "block" }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
               <div style={{ padding: "16px 20px" }}>
-                <a href="https://www.google.com/maps/place/Emeren+Aircon+%26+Refrigeration+Parts+%26+Services/@14.9658865,120.9073764,17.25z/data=!4m6!3m5!1s0x3397001af00e9c79:0x8392e70f15210957!8m2!3d14.9660995!4d120.9051816!16s%2Fg%2F11s8kbs7bv?entry=ttu&g_ep=EgoyMDI2MDMxMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="ghost-btn" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "9px 16px", fontSize: "13px", fontWeight: 600, textDecoration: "none", width: "100%" }}>
+                <a href="https://www.google.com/maps/place//@14.9661046,120.9003107,17z?entry=ttu&g_ep=EgoyMDI2MDMxNS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="ghost-btn" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "9px 16px", fontSize: "13px", fontWeight: 600, textDecoration: "none", width: "100%" }}>
                   <MapPin size={13} color="#374151" />
                   Get Directions
                 </a>

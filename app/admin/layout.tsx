@@ -5,16 +5,17 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Triangle, LayoutDashboard, ShoppingBag, Briefcase,
-  Package, LogOut, Menu, X, ChevronRight, CalendarCheck,
+  Package, LogOut, Menu, X, ChevronRight, CalendarCheck, Inbox,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const NAV_ITEMS = [
-  { href: "/admin",          label: "Dashboard",    icon: <LayoutDashboard size={16} /> },
-  { href: "/admin/orders",   label: "Orders",       icon: <ShoppingBag size={16} /> },
-  { href: "/admin/bookings", label: "Bookings",     icon: <CalendarCheck size={16} /> },
-  { href: "/admin/careers",  label: "Careers",      icon: <Briefcase size={16} /> },
-  { href: "/admin/products", label: "Products",     icon: <Package size={16} /> },
+  { href: "/admin",           label: "Dashboard", icon: <LayoutDashboard size={16} /> },
+  { href: "/admin/orders",    label: "Orders",    icon: <ShoppingBag size={16} /> },
+  { href: "/admin/bookings",  label: "Bookings",  icon: <CalendarCheck size={16} /> },
+  { href: "/admin/messages",  label: "Messages",  icon: <Inbox size={16} /> },
+  { href: "/admin/careers",   label: "Careers",   icon: <Briefcase size={16} /> },
+  { href: "/admin/products",  label: "Products",  icon: <Package size={16} /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
