@@ -20,14 +20,22 @@ import {
   X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
-import { ALL_PRODUCTS, BADGE_COLORS } from "@/lib/products";
+import { BADGE_COLORS, type Product } from "@/lib/products";
 
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/products").then(r => r.json()).then(json => {
+      const all: Product[] = json.products ?? [];
+      setFeaturedProducts(all.filter(p => p.badge).slice(0, 4));
+    });
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -887,7 +895,7 @@ export default function LandingPage() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "16px" }}>
-            {ALL_PRODUCTS.filter((p) => p.badge).slice(0, 4).map((p) => (
+            {featuredProducts.map((p) => (
               <FeaturedProductCard key={p.id} product={p} />
             ))}
           </div>
@@ -917,18 +925,18 @@ export default function LandingPage() {
                 className="section-label"
                 style={{ color: "#d97706", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "14px" }}
               >
-                Limited Time
+                Trusted AC Services
               </p>
               <h2
                 className="hero-title"
                 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 800, letterSpacing: "-1px", margin: "0 0 16px", lineHeight: 1.15, color: "#1a1a2e" }}
               >
-                Get ₱3,000 off your<br />first AC purchase
+                Stay cool with expert<br />aircon care
               </h2>
               <p style={{ color: "#6b7280", fontSize: "15px", lineHeight: 1.65, margin: "0 0 32px" }}>
                 {user
-                  ? "Welcome back! Browse our latest AC units and enjoy exclusive member pricing."
-                  : "Sign up today and receive an exclusive discount on any unit. Free installation included for orders over ₱25,000."}
+                  ? "Welcome back! Browse our latest AC units or book a service appointment today."
+                  : "From cleaning and repair to full installation — EMEREN has you covered. Browse our products or book a service now."}
               </p>
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                 {user ? (
@@ -1020,7 +1028,6 @@ export default function LandingPage() {
               { title: "Company", links: [
                 { label: "About Us", href: "/about" },
                 { label: "Careers", href: "/careers" },
-                { label: "Press", href: "/press" },
                 { label: "Contact Us", href: "/contact" },
               ]},
               { title: "Support", links: [

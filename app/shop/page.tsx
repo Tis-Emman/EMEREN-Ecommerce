@@ -8,7 +8,7 @@ import {
   ChevronDown, X, Zap, Wind, Building2, Layers, Package,
   Check, ShoppingCart, User, LogOut, Menu,
 } from "lucide-react";
-import { ALL_PRODUCTS, BRANDS, BADGE_COLORS, type Product } from "@/lib/products";
+import { BRANDS, BADGE_COLORS, type Product } from "@/lib/products";
 
 const CATEGORIES = [
   { label: "All",        value: "all",         icon: <Layers    size={15} /> },
@@ -36,6 +36,8 @@ export default function ShopPage() {
   const [user,          setUser]          = useState<{ email: string } | null>(null);
   const [userMenuOpen,  setUserMenuOpen]  = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [products,      setProducts]      = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -74,13 +76,20 @@ export default function ShopPage() {
   };
 
   useEffect(() => {
+    fetch("/api/products").then(r => r.json()).then(json => {
+      setProducts(json.products ?? []);
+      setProductsLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   // Filter products — price check uses the lowest variant price
-  const filtered = ALL_PRODUCTS
+  const filtered = products
     .filter((p) => {
       const lowestPrice = Math.min(...p.variants.map((v) => v.price));
       const matchSearch   = p.series.toLowerCase().includes(search.toLowerCase())
@@ -420,7 +429,7 @@ export default function ShopPage() {
         <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", flexWrap:"wrap", gap:"12px" }}>
           <h1 className="outfit" style={{ fontSize:"clamp(28px,5vw,48px)", fontWeight:900, letterSpacing:"-1.5px", color:"#1a1a2e", lineHeight:1.1 }}>All Products</h1>
           <p style={{ fontSize:"14px", color:"#9ca3af" }}>
-            Showing <span style={{ color:"#1a1a2e", fontWeight:700 }}>{filtered.length}</span> of {ALL_PRODUCTS.length} models
+            Showing <span style={{ color:"#1a1a2e", fontWeight:700 }}>{filtered.length}</span> of {products.length} models
           </p>
         </div>
       </div>
@@ -527,7 +536,12 @@ export default function ShopPage() {
 
       {/* ── Product grid ── */}
       <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"32px 24px 80px" }}>
-        {filtered.length === 0 ? (
+        {productsLoading ? (
+          <div style={{ display:"flex", justifyContent:"center", padding:"80px 0" }}>
+            <div style={{ width:"32px", height:"32px", borderRadius:"50%", border:"3px solid rgba(217,119,6,0.2)", borderTopColor:"#d97706", animation:"spin .8s linear infinite" }} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="empty-state" style={{ textAlign:"center", padding:"80px 24px" }}>
             <div style={{ fontSize:"48px", marginBottom:"16px" }}>🔍</div>
             <h3 className="outfit" style={{ fontSize:"22px", fontWeight:800, color:"#1a1a2e", marginBottom:"8px" }}>No products found</h3>

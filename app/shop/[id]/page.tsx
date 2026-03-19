@@ -9,19 +9,21 @@ import {
   User, LogOut, Phone, MapPin, Clock, ChevronRight,
   Shield, Wrench, Truck, Wind, Zap, Thermometer, Menu, X,
 } from "lucide-react";
-import { ALL_PRODUCTS, BADGE_COLORS, type Variant } from "@/lib/products";
+import { BADGE_COLORS, type Variant, type Product } from "@/lib/products";
 
 const formatPrice = (n: number) => `₱${n.toLocaleString()}`;
 
 export default function ProductPage() {
   const params   = useParams();
   const router   = useRouter();
-  const product  = ALL_PRODUCTS.find((p) => p.id === params.id);
 
+  const [product,        setProduct]       = useState<Product | null>(null);
+  const [allProducts,    setAllProducts]   = useState<Product[]>([]);
+  const [productLoading, setProductLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [added,         setAdded]         = useState(false);
   const [cartCount,     setCartCount]     = useState(0);
-  const [user,          setUser]          = useState<{ email: string } | null>(null);
+  const [user,          setUser]          = useState<{ id: string; email: string } | null>(null);
   const [userMenuOpen,  setUserMenuOpen]  = useState(false);
   const [scrolled,      setScrolled]      = useState(false);
   const [activeTab,     setActiveTab]     = useState<"features"|"specs">("features");
@@ -30,16 +32,33 @@ export default function ProductPage() {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const id = typeof params.id === "string" ? params.id : params.id?.[0] ?? "";
+    fetch(`/api/products/${id}`).then(r => r.json()).then(json => {
+      setProduct(json.product ?? null);
+      setProductLoading(false);
+    });
+    fetch("/api/products").then(r => r.json()).then(json => {
+      setAllProducts(json.products ?? []);
+    });
+  }, [params.id]);
+
+  useEffect(() => {
     if (product) setSelectedVariant(product.variants[0]);
   }, [product]);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user ? { email: data.user.email ?? "" } : null);
+      const u = data.user;
+      if (u) {
+        setUser({ id: u.id, email: u.email ?? "" });
+        supabase.from("cart_items").select("quantity").eq("user_id", u.id).then(({ data: rows }) => {
+          setCartCount(rows?.reduce((s, r) => s + r.quantity, 0) ?? 0);
+        });
+      }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ? { email: session.user.email ?? "" } : null);
+      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? "" } : null);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -74,11 +93,66 @@ export default function ProductPage() {
     setUser(null); setUserMenuOpen(false);
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
+    if (!user) {
+      router.push("/auth/signin");
+      return;
+    }
+    if (!selectedVariant || !product) return;
+
+    const supabase = createClient();
+
+    // Check if same product+variant already in cart
+    const { data: existing, error: selectErr } = await supabase
+      .from("cart_items")
+      .select("id, quantity")
+      .eq("user_id", user.id)
+      .eq("product_id", product.id)
+      .eq("variant_hp", selectedVariant.hp)
+      .maybeSingle();
+
+    if (selectErr) {
+      console.error("Cart select error:", selectErr);
+      alert(`Cart error: ${selectErr.message}`);
+      return;
+    }
+
+    if (existing) {
+      const { error: updateErr } = await (supabase.from("cart_items") as any)
+        .update({ quantity: existing.quantity + 1 })
+        .eq("id", existing.id);
+      if (updateErr) {
+        console.error("Cart update error:", updateErr);
+        alert(`Cart update error: ${updateErr.message}`);
+        return;
+      }
+    } else {
+      const { error: insertErr } = await supabase.from("cart_items").insert({
+        user_id: user.id,
+        product_id: product.id,
+        variant_hp: selectedVariant.hp,
+        quantity: 1,
+      });
+      if (insertErr) {
+        console.error("Cart insert error:", insertErr);
+        alert(`Cart insert error: ${insertErr.message}`);
+        return;
+      }
+    }
+
     setAdded(true);
     setCartCount((c) => c + 1);
     setTimeout(() => setAdded(false), 1800);
   };
+
+  if (productLoading) {
+    return (
+      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#f8f7f4" }}>
+        <div style={{ width:"32px", height:"32px", borderRadius:"50%", border:"3px solid rgba(217,119,6,0.2)", borderTopColor:"#d97706", animation:"spin .8s linear infinite" }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   if (!product || !selectedVariant) {
     return (
@@ -91,7 +165,7 @@ export default function ProductPage() {
   }
 
   const discount = Math.round(((selectedVariant.orig - selectedVariant.price) / selectedVariant.orig) * 100);
-  const related  = ALL_PRODUCTS.filter((p) => p.id !== product.id && (p.type === product.type || p.brand === product.brand)).slice(0, 3);
+  const related  = allProducts.filter((p) => p.id !== product.id && (p.type === product.type || p.brand === product.brand)).slice(0, 3);
 
   return (
     <div style={{ minHeight:"100vh", background:"#f8f7f4", fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif", color:"#1a1a2e" }}>

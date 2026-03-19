@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Routes that require the user to be logged in
-const PROTECTED_ROUTES = ["/profile", "/cart", "/checkout"];
+const PROTECTED_ROUTES = ["/profile", "/cart", "/checkout", "/admin"];
 
 // Routes that logged-in users should NOT visit (auth pages)
 const AUTH_ROUTES = ["/auth/signin", "/auth/signup"];

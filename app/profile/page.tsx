@@ -41,20 +41,13 @@ const TABS = [
   { id: "security",      label: "Security",       icon: <Lock size={15} /> },
 ];
 
-// Mock data — replace with real Supabase queries when orders/warranties tables exist
-const ORDERS = [
-  { id: "ORD-2025-001", date: "March 5, 2025",  items: ["FrostLine Pro 1.5HP"], total: 35000, status: "Delivered", statusColor: "#22c55e" },
-  { id: "ORD-2025-002", date: "Feb 18, 2025",   items: ["PolarMax Cassette 2.5HP", "ArcticBreeze Portable 1.0HP"], total: 90500, status: "Installed", statusColor: "#3b82f6" },
-  { id: "ORD-2024-089", date: "Dec 12, 2024",   items: ["FrostLine Pro 1.0HP"], total: 28500, status: "Delivered", statusColor: "#22c55e" },
-  { id: "ORD-2024-071", date: "Nov 3, 2024",    items: ["ArcticBreeze Split 1.0HP"], total: 22000, status: "Delivered", statusColor: "#22c55e" },
-];
-
-const WARRANTIES = [
-  { id: 1, product: "FrostLine Pro 1.5HP",        purchased: "March 5, 2025", expires: "March 5, 2027",  status: "Active", daysLeft: 726 },
-  { id: 2, product: "PolarMax Cassette 2.5HP",    purchased: "Feb 18, 2025",  expires: "Feb 18, 2027",   status: "Active", daysLeft: 709 },
-  { id: 3, product: "FrostLine Pro 1.0HP",        purchased: "Dec 12, 2024",  expires: "Dec 12, 2026",   status: "Active", daysLeft: 641 },
-  { id: 4, product: "ArcticBreeze Split 1.0HP",   purchased: "Nov 3, 2024",   expires: "Nov 3, 2026",    status: "Active", daysLeft: 602 },
-];
+const STATUS_COLORS: Record<string, string> = {
+  pending:   "#f59e0b",
+  confirmed: "#3b82f6",
+  delivered: "#22c55e",
+  installed: "#3b82f6",
+  cancelled: "#ef4444",
+};
 
 // ── PH Address Data (Pampanga & Bulacan only) ────────────────────────────────
 const ADDRESS_DATA: Record<string, Record<string, string[]>> = {
@@ -157,6 +150,17 @@ export default function ProfilePage() {
     serviceReminders: true,
   });
 
+  // ── Real orders from API ──────────────────────────────────────────────────────
+  type OrderRow = {
+    id: string;
+    status: string;
+    total: number;
+    created_at: string;
+    order_items: { product_name: string; quantity: number }[];
+  };
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
   // ── Address field inline cascade (Personal Info) ──────────────────────────
   const [addrField, setAddrField] = useState({ province: "", municipality: "", barangay: "" });
   const addrFieldMunicipalities = addrField.province ? Object.keys(ADDRESS_DATA[addrField.province] ?? {}) : [];
@@ -244,6 +248,18 @@ export default function ProfilePage() {
       setLoading(false);
     });
   }, [router]);
+
+  // ── Fetch real orders (overview, orders, and warranties tabs) ──────────────
+  useEffect(() => {
+    if (activeTab !== "orders" && activeTab !== "warranties" && activeTab !== "overview") return;
+    setOrdersLoading(true);
+    fetch("/api/orders")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.orders) setOrders(json.orders);
+      })
+      .finally(() => setOrdersLoading(false));
+  }, [activeTab]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -658,9 +674,9 @@ export default function ProfilePage() {
               {/* Stats */}
               <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "14px", animation: "fadeUp .4s ease both" }}>
                 {[
-                  { icon: <Package size={18} color="#d97706" />,  bg: "rgba(217,119,6,0.08)",   label: "Total Orders",     value: ORDERS.length.toString() },
-                  { icon: <Shield  size={18} color="#3b82f6" />,  bg: "rgba(59,130,246,0.08)",  label: "Active Warranties", value: WARRANTIES.length.toString() },
-                  { icon: <Truck   size={18} color="#22c55e" />,  bg: "rgba(34,197,94,0.08)",   label: "Delivered",         value: ORDERS.filter(o => o.status === "Delivered").length.toString() },
+                  { icon: <Package size={18} color="#d97706" />,  bg: "rgba(217,119,6,0.08)",   label: "Total Orders",     value: orders.length.toString() },
+                  { icon: <Shield  size={18} color="#3b82f6" />,  bg: "rgba(59,130,246,0.08)",  label: "Active Warranties", value: orders.filter(o => o.status === "delivered" || o.status === "installed").length.toString() },
+                  { icon: <Truck   size={18} color="#22c55e" />,  bg: "rgba(34,197,94,0.08)",   label: "Delivered",         value: orders.filter(o => o.status === "delivered").length.toString() },
                 ].map((s, i) => (
                   <div key={i} className="card" style={{ display: "flex", alignItems: "center", gap: "14px", animationDelay: `${i * 0.08}s` }}>
                     <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{s.icon}</div>
@@ -811,20 +827,26 @@ export default function ProfilePage() {
                   </button>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                  {ORDERS.slice(0, 2).map((order) => (
-                    <div key={order.id} className="order-row">
-                      <div>
-                        <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", marginBottom: "3px" }}>{order.id}</p>
-                        <p style={{ fontSize: "12px", color: "#9ca3af" }}>{order.items.join(", ")}</p>
+                  {orders.length === 0 ? (
+                    <p style={{ fontSize: "13px", color: "#9ca3af", textAlign: "center", padding: "16px 0" }}>No orders yet.</p>
+                  ) : orders.slice(0, 2).map((order) => {
+                    const statusColor = STATUS_COLORS[order.status] ?? "#6b7280";
+                    const itemNames = order.order_items.map((oi) => oi.product_name).join(", ");
+                    return (
+                      <div key={order.id} className="order-row">
+                        <div>
+                          <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", marginBottom: "3px" }}>#{order.id.slice(0, 8).toUpperCase()}</p>
+                          <p style={{ fontSize: "12px", color: "#9ca3af", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "240px" }}>{itemNames}</p>
+                        </div>
+                        <div style={{ textAlign: "right" }}>
+                          <span className="status-badge" style={{ background: `${statusColor}15`, color: statusColor, border: `1px solid ${statusColor}30`, marginBottom: "4px", display: "inline-flex", textTransform: "capitalize" }}>
+                            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: statusColor }} />{order.status}
+                          </span>
+                          <p className="outfit" style={{ fontSize: "14px", fontWeight: 800, color: "#1a1a2e" }}>{formatPrice(order.total)}</p>
+                        </div>
                       </div>
-                      <div style={{ textAlign: "right" }}>
-                        <span className="status-badge" style={{ background: `${order.statusColor}15`, color: order.statusColor, border: `1px solid ${order.statusColor}30`, marginBottom: "4px", display: "inline-flex" }}>
-                          <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: order.statusColor }} />{order.status}
-                        </span>
-                        <p className="outfit" style={{ fontSize: "14px", fontWeight: 800, color: "#1a1a2e" }}>{formatPrice(order.total)}</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </>
@@ -835,34 +857,50 @@ export default function ProfilePage() {
             <div className="card">
               <h2 className="outfit" style={{ fontSize: "16px", fontWeight: 800, color: "#1a1a2e", marginBottom: "4px" }}>Order History</h2>
               <p style={{ fontSize: "13px", color: "#9ca3af", marginBottom: "20px" }}>All your past and current orders</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {ORDERS.map((order, i) => (
-                  <div key={order.id} className="order-row" style={{ animationDelay: `${i * 0.07}s` }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                      <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(217,119,6,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <svg width="24" height="18" viewBox="0 0 88 64" fill="none">
-                          <rect x="4" y="16" width="80" height="36" rx="8" fill="#fff" stroke="rgba(217,119,6,0.3)" strokeWidth="2"/>
-                          <line x1="14" y1="24" x2="14" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
-                          <line x1="20" y1="24" x2="20" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
-                          <line x1="26" y1="24" x2="26" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
-                          <circle cx="76" cy="26" r="4" fill="#22c55e" opacity="0.8"/>
-                        </svg>
+              {ordersLoading ? (
+                <div style={{ textAlign: "center", padding: "32px" }}>
+                  <div style={{ width: "28px", height: "28px", borderRadius: "50%", border: "3px solid rgba(217,119,6,0.2)", borderTopColor: "#d97706", animation: "spin .8s linear infinite", margin: "0 auto" }} />
+                </div>
+              ) : orders.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "40px 24px" }}>
+                  <p style={{ fontSize: "14px", color: "#9ca3af", marginBottom: "12px" }}>No orders yet.</p>
+                  <Link href="/shop" style={{ fontSize: "13px", color: "#d97706", fontWeight: 600, textDecoration: "none" }}>Browse Products →</Link>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {orders.map((order, i) => {
+                    const statusColor = STATUS_COLORS[order.status] ?? "#6b7280";
+                    const date = new Date(order.created_at).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" });
+                    const itemNames = order.order_items.map((oi) => oi.product_name + (oi.quantity > 1 ? ` ×${oi.quantity}` : ""));
+                    return (
+                      <div key={order.id} className="order-row" style={{ animationDelay: `${i * 0.07}s` }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                          <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(217,119,6,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <svg width="24" height="18" viewBox="0 0 88 64" fill="none">
+                              <rect x="4" y="16" width="80" height="36" rx="8" fill="#fff" stroke="rgba(217,119,6,0.3)" strokeWidth="2"/>
+                              <line x1="14" y1="24" x2="14" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
+                              <line x1="20" y1="24" x2="20" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
+                              <line x1="26" y1="24" x2="26" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
+                              <circle cx="76" cy="26" r="4" fill="#22c55e" opacity="0.8"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", marginBottom: "2px" }}>#{order.id.slice(0, 8).toUpperCase()}</p>
+                            <p style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "4px" }}>{date} · {order.order_items.length} item{order.order_items.length !== 1 ? "s" : ""}</p>
+                            <p style={{ fontSize: "12px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "300px" }}>{itemNames.join(", ")}</p>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <span className="status-badge" style={{ background: `${statusColor}15`, color: statusColor, border: `1px solid ${statusColor}30`, marginBottom: "6px", display: "inline-flex", textTransform: "capitalize" }}>
+                            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: statusColor }} />{order.status}
+                          </span>
+                          <p className="outfit" style={{ fontSize: "16px", fontWeight: 800, color: "#1a1a2e" }}>{formatPrice(order.total)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", marginBottom: "2px" }}>{order.id}</p>
-                        <p style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "4px" }}>{order.date} · {order.items.length} item{order.items.length > 1 ? "s" : ""}</p>
-                        <p style={{ fontSize: "12px", color: "#6b7280" }}>{order.items.join(", ")}</p>
-                      </div>
-                    </div>
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <span className="status-badge" style={{ background: `${order.statusColor}15`, color: order.statusColor, border: `1px solid ${order.statusColor}30`, marginBottom: "6px", display: "inline-flex" }}>
-                        <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: order.statusColor }} />{order.status}
-                      </span>
-                      <p className="outfit" style={{ fontSize: "16px", fontWeight: 800, color: "#1a1a2e" }}>{formatPrice(order.total)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -870,47 +908,68 @@ export default function ProfilePage() {
           {activeTab === "warranties" && (
             <div className="card">
               <h2 className="outfit" style={{ fontSize: "16px", fontWeight: 800, color: "#1a1a2e", marginBottom: "4px" }}>Warranty Tracker</h2>
-              <p style={{ fontSize: "13px", color: "#9ca3af", marginBottom: "20px" }}>All units under warranty coverage</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {WARRANTIES.map((w, i) => (
-                  <div key={w.id} style={{ padding: "16px", borderRadius: "14px", border: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", animationDelay: `${i * 0.07}s` }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(217,119,6,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <svg width="20" height="15" viewBox="0 0 88 64" fill="none">
-                            <rect x="4" y="16" width="80" height="36" rx="8" fill="#fff" stroke="rgba(217,119,6,0.4)" strokeWidth="2"/>
-                            <line x1="14" y1="24" x2="14" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
-                            <line x1="20" y1="24" x2="20" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
-                            <circle cx="76" cy="26" r="4" fill="#22c55e" opacity="0.8"/>
-                          </svg>
+              <p style={{ fontSize: "13px", color: "#9ca3af", marginBottom: "20px" }}>Units from delivered orders are covered by a 2-year warranty</p>
+              {ordersLoading ? (
+                <div style={{ textAlign: "center", padding: "32px" }}>
+                  <div style={{ width: "28px", height: "28px", borderRadius: "50%", border: "3px solid rgba(217,119,6,0.2)", borderTopColor: "#d97706", animation: "spin .8s linear infinite", margin: "0 auto" }} />
+                </div>
+              ) : (() => {
+                const deliveredOrders = orders.filter((o) => o.status === "delivered" || o.status === "installed");
+                const warrantyItems = deliveredOrders.flatMap((o) =>
+                  o.order_items.map((oi) => {
+                    const purchasedDate = new Date(o.created_at);
+                    const expiresDate = new Date(purchasedDate);
+                    expiresDate.setFullYear(expiresDate.getFullYear() + 2);
+                    const daysLeft = Math.max(0, Math.round((expiresDate.getTime() - Date.now()) / 86400000));
+                    return { id: `${o.id}-${oi.product_name}`, product: oi.product_name, purchased: purchasedDate.toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" }), expires: expiresDate.toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" }), daysLeft, active: daysLeft > 0 };
+                  })
+                );
+                if (warrantyItems.length === 0) return (
+                  <div style={{ textAlign: "center", padding: "40px 24px" }}>
+                    <p style={{ fontSize: "14px", color: "#9ca3af", marginBottom: "12px" }}>No active warranties yet. Warranties appear once your orders are delivered.</p>
+                    <Link href="/shop" style={{ fontSize: "13px", color: "#d97706", fontWeight: 600, textDecoration: "none" }}>Shop Now →</Link>
+                  </div>
+                );
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    {warrantyItems.map((w, i) => (
+                      <div key={w.id} style={{ padding: "16px", borderRadius: "14px", border: "1px solid rgba(0,0,0,0.07)", background: "#fafafa", animationDelay: `${i * 0.07}s` }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(217,119,6,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <svg width="20" height="15" viewBox="0 0 88 64" fill="none">
+                                <rect x="4" y="16" width="80" height="36" rx="8" fill="#fff" stroke="rgba(217,119,6,0.4)" strokeWidth="2"/>
+                                <line x1="14" y1="24" x2="14" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
+                                <line x1="20" y1="24" x2="20" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
+                                <circle cx="76" cy="26" r="4" fill="#22c55e" opacity="0.8"/>
+                              </svg>
+                            </div>
+                            <div>
+                              <p style={{ fontSize: "14px", fontWeight: 700, color: "#1a1a2e", marginBottom: "2px" }}>{w.product}</p>
+                              <p style={{ fontSize: "12px", color: "#9ca3af" }}>Purchased {w.purchased}</p>
+                            </div>
+                          </div>
+                          <span className="status-badge" style={{ background: w.active ? "rgba(34,197,94,0.1)" : "rgba(0,0,0,0.05)", color: w.active ? "#16a34a" : "#9ca3af", border: `1px solid ${w.active ? "rgba(34,197,94,0.2)" : "rgba(0,0,0,0.1)"}` }}>
+                            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: w.active ? "#22c55e" : "#9ca3af" }} />{w.active ? "Active" : "Expired"}
+                          </span>
                         </div>
-                        <div>
-                          <p style={{ fontSize: "14px", fontWeight: 700, color: "#1a1a2e", marginBottom: "2px" }}>{w.product}</p>
-                          <p style={{ fontSize: "12px", color: "#9ca3af" }}>Purchased {w.purchased}</p>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: "12px", color: "#9ca3af" }}>Expires {w.expires}</span>
+                          <span style={{ fontSize: "12px", fontWeight: 700, color: "#d97706" }}>{w.daysLeft} days left</span>
+                        </div>
+                        <div className="warranty-bar-bg">
+                          <div className="warranty-bar-fill" style={{ width: `${Math.min((w.daysLeft / 730) * 100, 100)}%` }} />
+                        </div>
+                        <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
+                          <Link href="/services" style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "8px", background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.2)", color: "#d97706", fontSize: "12px", fontWeight: 600, textDecoration: "none" }}>
+                            <Wrench size={12} /> Request Service
+                          </Link>
                         </div>
                       </div>
-                      <span className="status-badge" style={{ background: "rgba(34,197,94,0.1)", color: "#16a34a", border: "1px solid rgba(34,197,94,0.2)" }}>
-                        <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#22c55e" }} />{w.status}
-                      </span>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: "12px", color: "#9ca3af" }}>Expires {w.expires}</span>
-                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#d97706" }}>{w.daysLeft} days left</span>
-                    </div>
-                    <div className="warranty-bar-bg">
-                      <div className="warranty-bar-fill" style={{ width: `${Math.min((w.daysLeft / 730) * 100, 100)}%` }} />
-                    </div>
-                    <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
-                      <Link href="/services" style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "8px", background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.2)", color: "#d97706", fontSize: "12px", fontWeight: 600, textDecoration: "none" }}>
-                        <Wrench size={12} /> Request Service
-                      </Link>
-                      <button style={{ display: "flex", alignItems: "center", gap: "5px", padding: "6px 12px", borderRadius: "8px", background: "transparent", border: "1px solid rgba(0,0,0,0.1)", color: "#6b7280", fontSize: "12px", fontWeight: 600, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-                        View Details
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           )}
 
