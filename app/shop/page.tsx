@@ -250,7 +250,7 @@ export default function ShopPage() {
           .product-card .card-price { font-size: 15px !important; }
 
           /* Hero section compact */
-          .page-hero { padding-top: 230px !important; padding-bottom: 24px !important; }
+          .page-hero { padding-top: 96px !important; padding-bottom: 24px !important; }
 
           /* Footer stack vertically */
           .footer-inner { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
@@ -394,6 +394,9 @@ export default function ShopPage() {
               {user && (
                 <>
                   <div className="mobile-nav-divider" />
+                  <Link href="/my-units" className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
+                    <span className="link-icon"><AirVent size={16} color="#d97706" /></span>My Units
+                  </Link>
                   <Link href="/profile" className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
                     <span className="link-icon"><User size={16} color="#d97706" /></span>My Profile
                   </Link>
@@ -425,7 +428,7 @@ export default function ShopPage() {
       )}
 
       {/* ── Page hero ── */}
-      <div className="page-hero" style={{ paddingTop:"210px", paddingBottom:"40px", paddingLeft:"24px", paddingRight:"24px", maxWidth:"1280px", margin:"0 auto" }}>
+      <div className="page-hero" style={{ paddingTop:"96px", paddingBottom:"40px", paddingLeft:"24px", paddingRight:"24px", maxWidth:"1280px", margin:"0 auto" }}>
         <p style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", color:"#d97706", marginBottom:"10px", fontFamily:"'Outfit',sans-serif" }}>Our Collection</p>
         <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", flexWrap:"wrap", gap:"12px" }}>
           <h1 className="outfit" style={{ fontSize:"clamp(28px,5vw,48px)", fontWeight:900, letterSpacing:"-1.5px", color:"#1a1a2e", lineHeight:1.1 }}>All Products</h1>
@@ -436,7 +439,7 @@ export default function ShopPage() {
       </div>
 
       {/* ── Toolbar ── */}
-      <div style={{ position:"fixed", top:"68px", left:0, right:0, zIndex:40, background:"rgba(248,247,244,0.95)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", borderBottom:"1px solid rgba(0,0,0,0.06)", padding:"14px 24px" }}>
+      <div style={{ background:"#f8f7f4", borderBottom:"1px solid rgba(0,0,0,0.06)", padding:"14px 24px" }}>
         <div style={{ maxWidth:"1280px", margin:"0 auto", display:"flex", flexDirection:"column", gap:"12px" }}>
           <div className="toolbar-row" style={{ display:"flex", gap:"10px", alignItems:"center" }}>
             {/* Search */}

@@ -641,6 +641,15 @@ export default function LandingPage() {
                 <>
                   <div className="mobile-nav-divider" />
                   <Link
+                    href="/my-units"
+                    className="mobile-nav-link"
+                    onClick={() => setMobileNavOpen(false)}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <span className="link-icon"><AirVent size={16} color="#d97706" /></span>
+                    My Units
+                  </Link>
+                  <Link
                     href="/profile"
                     className="mobile-nav-link"
                     onClick={() => setMobileNavOpen(false)}

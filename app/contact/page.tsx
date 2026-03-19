@@ -377,6 +377,9 @@ export default function ContactPage() {
               {user && (
                 <>
                   <div className="mobile-nav-divider" />
+                  <Link href="/my-units" className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
+                    <span className="link-icon"><AirVent size={16} color="#d97706" /></span>My Units
+                  </Link>
                   <Link href="/profile" className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
                     <span className="link-icon"><User size={16} color="#d97706" /></span>My Profile
                   </Link>
