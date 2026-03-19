@@ -20,8 +20,10 @@ import {
   AirVent,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth-context";
 
 export default function AboutPage() {
+  const { profileName } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -309,7 +311,7 @@ export default function AboutPage() {
                     <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <User size={13} color="#fff" />
                     </div>
-                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e", maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email.split("@")[0]}</span>
+                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e", maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profileName ?? user.email.split("@")[0]}</span>
                   </button>
                   {userMenuOpen && (
                     <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "14px", boxShadow: "0 8px 32px rgba(0,0,0,0.1)", padding: "8px", minWidth: "180px", zIndex: 100 }}>

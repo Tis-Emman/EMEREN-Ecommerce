@@ -30,6 +30,7 @@ import {
   Menu,
   Home,
   Plus,
+  AirVent,
 } from "lucide-react";
 
 const TABS = [
@@ -128,7 +129,8 @@ export default function ProfilePage() {
   const [editingField,  setEditingField]  = useState<keyof ProfileData | null>(null);
   const [saving,        setSaving]        = useState(false);
   const [saveError,     setSaveError]     = useState("");
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [mobileNavOpen,  setMobileNavOpen]  = useState(false);
+  const [userMenuOpen,   setUserMenuOpen]   = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [loading,       setLoading]       = useState(true);
 
@@ -208,6 +210,16 @@ export default function ProfilePage() {
   const setDefaultAddress = (id: number) => setSavedAddresses(prev => prev.map(a => ({ ...a, isDefault: a.id === id })));
 
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [userMenuOpen]);
 
   // ── Load profile from Supabase ──────────────────────────────────────────────
   useEffect(() => {
@@ -560,10 +572,15 @@ export default function ProfilePage() {
               >
                 <ShoppingCart size={17} color="#374151" />
               </Link>
-              {/* Profile avatar — active */}
-              <Link href="/profile" style={{ width: "40px", height: "40px", borderRadius: "12px", background: "linear-gradient(135deg, #d97706, #fbbf24)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: 800, color: "#fff", cursor: "pointer", boxShadow: "0 3px 10px rgba(217,119,6,0.3)", border: "2px solid #d97706", textDecoration: "none" }}>
-                {profile.firstName ? profile.firstName[0].toUpperCase() : <User size={16} color="#fff" />}
-              </Link>
+              {/* Avatar — non-clickable identity indicator */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)" }}>
+                <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <User size={13} color="#fff" />
+                </div>
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e", maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {profile.firstName || profile.email.split("@")[0] || "Account"}
+                </span>
+              </div>
               {/* Mobile hamburger */}
               <button className="mobile-menu-btn" onClick={() => setMobileNavOpen((v) => !v)}
                 style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer", marginLeft: "4px" }}

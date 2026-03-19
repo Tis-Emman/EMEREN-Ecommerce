@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth-context";
 import {
   Triangle, ArrowRight, Search, SlidersHorizontal, Star,
   ChevronDown, X, Zap, Wind, Building2, Layers, Package,
@@ -24,6 +25,7 @@ const SORT_OPTIONS = ["Featured", "Price: Low to High", "Price: High to Low", "T
 const formatPrice = (n: number) => `₱${n.toLocaleString()}`;
 
 export default function ShopPage() {
+  const { profileName } = useAuth();
   const [scrolled,      setScrolled]      = useState(false);
   const [search,        setSearch]        = useState("");
   const [category,      setCategory]      = useState("all");
@@ -309,7 +311,7 @@ export default function ShopPage() {
                       <User size={13} color="#fff" />
                     </div>
                     <span style={{ fontSize:"13px", fontWeight:600, color:"#1a1a2e", maxWidth:"100px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                      {user.email.split("@")[0]}
+                      {profileName ?? user.email.split("@")[0]}
                     </span>
                   </button>
                   {userMenuOpen && (

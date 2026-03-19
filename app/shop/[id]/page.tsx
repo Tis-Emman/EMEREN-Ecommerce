@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth-context";
 import {
   Triangle, ArrowLeft, ArrowRight, Star, Check, ShoppingCart,
   User, LogOut, Phone, MapPin, Clock, ChevronRight,
@@ -14,6 +15,7 @@ import { BADGE_COLORS, type Variant, type Product } from "@/lib/products";
 const formatPrice = (n: number) => `₱${n.toLocaleString()}`;
 
 export default function ProductPage() {
+  const { profileName } = useAuth();
   const params   = useParams();
   const router   = useRouter();
 
@@ -305,7 +307,7 @@ export default function ProductPage() {
                       <User size={13} color="#fff" />
                     </div>
                     <span style={{ fontSize:"13px", fontWeight:600, color:"#1a1a2e", maxWidth:"100px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                      {user.email.split("@")[0]}
+                      {profileName ?? user.email.split("@")[0]}
                     </span>
                   </button>
                   {userMenuOpen && (

@@ -21,9 +21,11 @@ import {
   AirVent,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth-context";
 import { BADGE_COLORS, type Product } from "@/lib/products";
 
 export default function LandingPage() {
+  const { profileName } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -492,7 +494,7 @@ export default function LandingPage() {
                       <User size={13} color="#fff" />
                     </div>
                     <span style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e", maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {user.email.split("@")[0]}
+                      {profileName ?? user.email.split("@")[0]}
                     </span>
                   </button>
 

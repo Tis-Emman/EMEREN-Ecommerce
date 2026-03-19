@@ -20,6 +20,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth-context";
 import {
   Triangle, AirVent, Plus, Trash2, Wrench,
   CalendarDays, Clock, ShoppingCart, User, Menu, X,
@@ -76,10 +77,13 @@ export default function MyUnitsPage() {
   const router = useRouter();
 
   // Auth
-  const [authUser,  setAuthUser]  = useState<{ email: string } | null>(null);
-  const [cartCount, setCartCount] = useState(0);
-  const [scrolled,  setScrolled]  = useState(false);
-  const [mobileNav, setMobileNav] = useState(false);
+  const { profileName } = useAuth();
+  const [authUser,     setAuthUser]     = useState<{ email: string } | null>(null);
+  const [cartCount,    setCartCount]    = useState(0);
+  const [scrolled,     setScrolled]     = useState(false);
+  const [mobileNav,    setMobileNav]    = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Data
   const [units,      setUnits]      = useState<UserUnit[]>([]);
@@ -107,9 +111,17 @@ export default function MyUnitsPage() {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [userMenuOpen]);
 
   async function loadUnits(supabase: ReturnType<typeof createClient>) {
     setLoading(true);
@@ -257,10 +269,53 @@ export default function MyUnitsPage() {
                   <span style={{ position: "absolute", top: "-5px", right: "-5px", minWidth: "17px", height: "17px", borderRadius: "999px", background: "#d97706", color: "#fff", fontSize: "9px", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", border: "2px solid #f8f7f4" }}>{cartCount}</span>
                 )}
               </Link>
-              {/* Avatar — links to profile */}
-              <Link href="/profile" style={{ width: "40px", height: "40px", borderRadius: "12px", background: "linear-gradient(135deg, #d97706, #fbbf24)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: 800, color: "#fff", cursor: "pointer", boxShadow: "0 3px 10px rgba(217,119,6,0.3)", border: "2px solid #d97706", textDecoration: "none" }}>
-                {authUser?.email ? authUser.email[0].toUpperCase() : <User size={16} color="#fff" />}
-              </Link>
+              {/* User dropdown */}
+              <div style={{ position: "relative" }} ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                >
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <User size={13} color="#fff" />
+                  </div>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e", maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {profileName ?? authUser?.email?.split("@")[0] ?? "Account"}
+                  </span>
+                </button>
+
+                {userMenuOpen && (
+                  <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "14px", boxShadow: "0 8px 32px rgba(0,0,0,0.1)", padding: "8px", minWidth: "180px", zIndex: 100 }}>
+                    <div style={{ padding: "8px 12px 12px", borderBottom: "1px solid rgba(0,0,0,0.06)", marginBottom: "6px" }}>
+                      <p style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Signed in as</p>
+                      <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{authUser?.email}</p>
+                    </div>
+                    <Link href="/shop"
+                      style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none", transition: "background .15s" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                      onClick={() => setUserMenuOpen(false)}
+                    >Browse Shop</Link>
+                    <Link href="/my-units"
+                      style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#d97706", textDecoration: "none", transition: "background .15s" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(217,119,6,0.06)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                      onClick={() => setUserMenuOpen(false)}
+                    ><AirVent size={14} /> My Units</Link>
+                    <Link href="/profile"
+                      style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none", transition: "background .15s" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                      onClick={() => setUserMenuOpen(false)}
+                    ><User size={14} /> My Profile</Link>
+                    <button
+                      onClick={handleSignOut}
+                      style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", border: "none", background: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#ef4444", fontFamily: "'Plus Jakarta Sans', sans-serif", transition: "background .15s" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.06)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                    ><LogOut size={14} /> Sign Out</button>
+                  </div>
+                )}
+              </div>
               {/* Mobile hamburger */}
               <button className="mobile-menu-btn" onClick={() => setMobileNav((v) => !v)}
                 style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer", marginLeft: "4px" }}>
