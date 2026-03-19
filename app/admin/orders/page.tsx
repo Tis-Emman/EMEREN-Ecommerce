@@ -19,7 +19,8 @@ interface Order {
   notes: string | null;
   created_at: string;
   order_items: OrderItem[];
-  profiles: { email: string; full_name: string | null } | null;
+  user_id: string;
+  profiles?: { email: string; full_name: string | null } | null;
 }
 
 const STATUSES = ["all", "pending", "confirmed", "delivered", "installed", "cancelled"];
@@ -205,7 +206,7 @@ export default function AdminOrdersPage() {
                     </div>
                     <div>
                       <p style={{ fontSize: "12px", color: "#94a3b8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {order.profiles?.email ?? "—"}
+                        {order.profiles?.email ?? `User ${order.user_id.slice(0, 8)}…`}
                       </p>
                       {order.profiles?.full_name && (
                         <p style={{ fontSize: "10px", color: "#475569", marginTop: "1px" }}>{order.profiles.full_name}</p>

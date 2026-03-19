@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const service = createServiceClient();
 
     let query = (service.from("orders") as any)
-      .select("*, order_items(*), profiles(email, full_name)")
+      .select("*, order_items(*)")
       .order("created_at", { ascending: false });
 
     if (status && status !== "all") query = query.eq("status", status);

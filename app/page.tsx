@@ -18,6 +18,7 @@ import {
   LogOut,
   Menu,
   X,
+  AirVent,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { BADGE_COLORS, type Product } from "@/lib/products";
@@ -508,6 +509,14 @@ export default function LandingPage() {
                         onClick={() => setUserMenuOpen(false)}
                       >
                         Browse Shop
+                      </Link>
+                      <Link href="/my-units"
+                        style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none", transition: "background .15s" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <AirVent size={14} /> My Units
                       </Link>
                       <Link href="/profile"
                         style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none", transition: "background .15s" }}

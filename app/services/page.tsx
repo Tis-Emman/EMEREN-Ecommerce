@@ -7,7 +7,7 @@ import {
   Triangle, ArrowRight, Star, ShoppingCart, User, LogOut,
   Check, Phone, MapPin, Clock, Shield, Droplets, Wind,
   ChevronRight, Wrench, CalendarCheck, BadgeCheck, Thermometer,
-  Home, Store, Menu, X, Calendar, CheckCircle, Loader,
+  Home, Store, Menu, X, Calendar, CheckCircle, Loader, AirVent,
 } from "lucide-react";
 import { SERVICES, type Service } from "@/lib/services";
 
@@ -1171,6 +1171,7 @@ export default function ServicesPage() {
                         <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</p>
                       </div>
                       <Link href="/shop" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none" }} onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")} onMouseLeave={(e) => (e.currentTarget.style.background = "none")} onClick={() => setUserMenuOpen(false)}>Browse Shop</Link>
+                      <Link href="/my-units" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none" }} onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")} onMouseLeave={(e) => (e.currentTarget.style.background = "none")} onClick={() => setUserMenuOpen(false)}><AirVent size={14} /> My Units</Link>
                       <Link href="/profile" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none" }} onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")} onMouseLeave={(e) => (e.currentTarget.style.background = "none")} onClick={() => setUserMenuOpen(false)}><User size={14} /> My Profile</Link>
                       <button onClick={handleSignOut} style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", border: "none", background: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, color: "#ef4444", fontFamily: "'Plus Jakarta Sans',sans-serif" }} onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.06)")} onMouseLeave={(e) => (e.currentTarget.style.background = "none")}><LogOut size={14} /> Sign Out</button>
                     </div>

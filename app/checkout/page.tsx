@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Triangle, ArrowRight, ShoppingCart, ChevronRight,
   MapPin, CreditCard, Banknote, Check, Loader2,
-  User, LogOut,
+  User, LogOut, AirVent,
 } from "lucide-react";
 import { createClient, type Database } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth-context";
@@ -242,6 +242,12 @@ export default function CheckoutPage() {
                   </button>
                   {userMenuOpen && (
                     <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "14px", boxShadow: "0 8px 32px rgba(0,0,0,0.1)", padding: "8px", minWidth: "180px", zIndex: 100 }}>
+                      <Link href="/my-units"
+                        style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none" }}
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <AirVent size={14} /> My Units
+                      </Link>
                       <Link href="/profile"
                         style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none" }}
                         onClick={() => setUserMenuOpen(false)}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Triangle, ArrowRight, ShoppingCart, Trash2, Plus, Minus,
-  Tag, Truck, Shield, Wrench, ChevronRight, X, Check, User, LogOut,
+  Tag, Truck, Shield, Wrench, ChevronRight, X, Check, User, LogOut, AirVent,
 } from "lucide-react";
 import { createClient, type Database } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth-context";
@@ -227,6 +227,14 @@ export default function CartPage() {
                         <p style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Signed in as</p>
                         <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</p>
                       </div>
+                      <Link href="/my-units"
+                        style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none", transition: "background .15s" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <AirVent size={14} /> My Units
+                      </Link>
                       <Link href="/profile"
                         style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 12px", borderRadius: "9px", fontSize: "13px", fontWeight: 600, color: "#374151", textDecoration: "none", transition: "background .15s" }}
                         onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}

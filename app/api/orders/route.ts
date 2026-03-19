@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "@/lib/supabase";
+import { createServiceClient, type Database } from "@/lib/supabase";
 
 type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 type OrderItemRow = Database["public"]["Tables"]["order_items"]["Row"];
@@ -40,8 +40,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
+    // Use service client for writes to bypass RLS
+    const service = createServiceClient();
+
     // Create order
-    const { data: orderData, error: orderError } = await (supabase
+    const { data: orderData, error: orderError } = await (service
       .from("orders") as any)
       .insert({
         user_id: user.id,
@@ -81,11 +84,11 @@ export async function POST(req: NextRequest) {
       quantity: item.quantity,
     }));
 
-    const { error: itemsError } = await (supabase.from("order_items") as any).insert(orderItems);
+    const { error: itemsError } = await (service.from("order_items") as any).insert(orderItems);
     if (itemsError) throw itemsError;
 
     // Clear cart
-    await supabase.from("cart_items").delete().eq("user_id", user.id);
+    await service.from("cart_items").delete().eq("user_id", user.id);
 
     return NextResponse.json({ success: true, order_id: order.id }, { status: 201 });
   } catch (err) {
