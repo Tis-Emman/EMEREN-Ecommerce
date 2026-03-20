@@ -556,11 +556,11 @@ export default function ProductPage() {
               <button className={`add-btn ${added ? "added" : ""}`} onClick={handleAdd} style={{ flex:1, minWidth:"160px", justifyContent:"center" }}>
                 {added ? <><Check size={16} /> Added to Cart</> : <><ShoppingCart size={16} /> Add to Cart</>}
               </button>
-              <a href="https://m.me/emerenph" target="_blank" rel="noopener noreferrer"
-                style={{ flex:1, minWidth:"160px", padding:"14px 20px", borderRadius:"14px", border:"1.5px solid rgba(0,0,0,0.12)", background:"#fff", fontSize:"14px", fontWeight:700, color:"#374151", cursor:"pointer", display:"inline-flex", alignItems:"center", justifyContent:"center", gap:"8px", textDecoration:"none", transition:"all .2s" }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor="rgba(217,119,6,.5)"; e.currentTarget.style.color="#d97706"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor="rgba(0,0,0,0.12)"; e.currentTarget.style.color="#374151"; }}
-              ><Phone size={15} /> Inquire</a>
+              <a href="/checkout"
+                style={{ flex:1, minWidth:"160px", padding:"14px 20px", borderRadius:"14px", border:"none", background:"#1a1a2e", fontSize:"14px", fontWeight:700, color:"#fff", cursor:"pointer", display:"inline-flex", alignItems:"center", justifyContent:"center", gap:"8px", textDecoration:"none", transition:"all .2s" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background="#d97706"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background="#1a1a2e"; }}
+              ><ShoppingCart size={15} /> Buy Now</a>
             </div>
           </div>
         </div>
@@ -607,7 +607,7 @@ export default function ProductPage() {
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"20px" }}>
             <div style={{ borderRadius:"20px", overflow:"hidden", border:"1px solid rgba(0,0,0,0.08)", aspectRatio:"16/9" }}>
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30799.67!2d120.9!3d14.95!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b0e4b9170001%3A0x1f3c6d4b8a3e4c2f!2sBaliuag%2C%20Bulacan!5e0!3m2!1sen!2sph!4v1699999999999"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3854.4787791348845!2d120.90031068436424!3d14.966104630820446!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397001af00e9c79%3A0x8392e70f15210957!2sEmeren%20Aircon%20%26%20Refrigeration%20Parts%20%26%20Services!5e0!3m2!1sen!2sph!4v1773937329840!5m2!1sen!2sph"
                 width="100%" height="100%" style={{ border:0, display:"block" }}
                 allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
               />
