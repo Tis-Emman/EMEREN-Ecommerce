@@ -212,7 +212,6 @@ export default function MyUnitsPage() {
         .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1.5px; background:#d97706; transition:width .25s; }
         .nav-link:hover { color:#1a1a2e; }
         .nav-link:hover::after { width:100%; }
-        @media (min-width:768px) { .mobile-menu-btn { display:none !important; } }
         .cta-btn { display:inline-flex; align-items:center; gap:7px; padding:10px 22px; background:#d97706; color:#fff; border:none; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; text-decoration:none; transition:background .15s,transform .15s,box-shadow .15s; box-shadow:0 2px 8px rgba(217,119,6,0.3); }
         .cta-btn:hover { background:#b45309; transform:translateY(-1px); box-shadow:0 4px 14px rgba(217,119,6,0.4); }
         .ghost-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 20px; background:transparent; color:#374151; border:1.5px solid rgba(0,0,0,0.15); border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; text-decoration:none; transition:all .15s; }
@@ -222,8 +221,27 @@ export default function MyUnitsPage() {
         .menu-item { display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:9px; font-size:13px; font-weight:600; color:#374151; text-decoration:none; transition:background .15s; cursor:pointer; border:none; background:none; width:100%; font-family:'Plus Jakarta Sans',sans-serif; }
         .menu-item:hover { background:rgba(0,0,0,0.04); }
         .inp-focus:focus { border-color:#d97706 !important; }
-        @media (max-width: 768px) {
-          .desktop-only { display:none !important; }
+        /* ── Nav ── */
+        .desktop-only { display: none !important; }
+        .nav-bar { display: flex; align-items: center; justify-content: space-between; }
+        @media (min-width: 768px) {
+          .desktop-only { display: flex !important; }
+          .mobile-menu-btn { display: none !important; }
+          .nav-bar { display: grid; grid-template-columns: 1fr auto 1fr; }
+        }
+        /* ── Mobile Nav Drawer ── */
+        .mobile-nav-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.35); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); z-index:45; animation:fadeUp .2s ease both; }
+        .mobile-nav { position:fixed; top:0; right:0; bottom:0; width:min(320px,88vw); background:#faf9f6; z-index:50; display:flex; flex-direction:column; box-shadow:-8px 0 40px rgba(0,0,0,0.14); animation:slideInRight .25s cubic-bezier(.22,1,.36,1) both; overflow-y:auto; }
+        @keyframes slideInRight { from{transform:translateX(100%)} to{transform:translateX(0)} }
+        .mobile-nav-header { display:flex; align-items:center; justify-content:space-between; padding:18px 20px 16px; border-bottom:1px solid rgba(0,0,0,0.07); flex-shrink:0; }
+        .mobile-nav-links { flex:1; padding:8px 12px; display:flex; flex-direction:column; gap:2px; }
+        .mobile-nav-link { display:flex; align-items:center; gap:12px; padding:13px 12px; border-radius:12px; font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:600; color:#374151; text-decoration:none; transition:background .15s,color .15s; cursor:pointer; background:none; border:none; width:100%; text-align:left; }
+        .mobile-nav-link:hover { background:rgba(217,119,6,0.07); color:#d97706; }
+        .mobile-nav-link .link-icon { width:34px; height:34px; border-radius:9px; background:rgba(0,0,0,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .15s; }
+        .mobile-nav-link:hover .link-icon { background:rgba(217,119,6,0.12); }
+        .mobile-nav-footer { padding:16px 20px 28px; border-top:1px solid rgba(0,0,0,0.07); display:flex; flex-direction:column; gap:10px; flex-shrink:0; }
+        /* ── Mobile layout ── */
+        @media (max-width: 767px) {
           .stat-grid { grid-template-columns: repeat(2,1fr) !important; }
           .unit-grid  { grid-template-columns: 1fr !important; }
         }
@@ -235,7 +253,7 @@ export default function MyUnitsPage() {
       {/* ── Navbar ─────────────────────────────────────────────────────────── */}
       <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, transition: "all .3s" }}>
         <div className={scrolled ? "glass" : ""} style={{ transition: "all .3s", borderBottom: scrolled ? "1px solid rgba(0,0,0,0.07)" : "1px solid transparent" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px", height: "68px", display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
+          <div className="nav-bar" style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px", height: "68px", gap: "16px" }}>
 
             {/* Logo */}
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none", flexShrink: 0 }}>
@@ -246,7 +264,7 @@ export default function MyUnitsPage() {
             </Link>
 
             {/* Desktop nav */}
-            <nav style={{ display: "flex", alignItems: "center", gap: "28px", justifyContent: "center" }}>
+            <nav className="desktop-only" style={{ alignItems: "center", gap: "28px", justifyContent: "center" }}>
               {([["Shop","/shop"],["Services","/services"],["Contact","/contact"],["About Us","/about"]] as [string,string][]).map(([label,href]) => (
                 <Link key={label} href={href} className="nav-link"
                   style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }}
@@ -260,7 +278,7 @@ export default function MyUnitsPage() {
             <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
               <CartPreview />
               {/* User dropdown */}
-              <div style={{ position: "relative" }} ref={userMenuRef}>
+              <div style={{ position: "relative" }} ref={userMenuRef} className="desktop-only">
                 <button
                   onClick={() => setUserMenuOpen((v) => !v)}
                   style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
@@ -316,22 +334,46 @@ export default function MyUnitsPage() {
         </div>
       </header>
 
-      {/* Mobile nav overlay */}
+      {/* Mobile Nav Drawer */}
       {mobileNav && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(248,247,244,0.97)", backdropFilter: "blur(20px)", zIndex: 40, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "32px" }}>
-          <button onClick={() => setMobileNav(false)} style={{ position: "absolute", top: "20px", right: "24px", display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer" }}>
-            <X size={18} color="#1a1a2e" />
-          </button>
-          {[["Shop","/shop"],["Services","/services"],["My Units","/my-units"],["Contact","/contact"],["About Us","/about"]].map(([label,href]) => (
-            <Link key={href} href={href} onClick={() => setMobileNav(false)}
-              style={{ fontFamily: "'Outfit',sans-serif", fontSize: "28px", fontWeight: 700, color: href === "/my-units" ? "#d97706" : "#1a1a2e", textDecoration: "none", letterSpacing: "-0.5px" }}>
-              {label}
-            </Link>
-          ))}
-          <button onClick={() => { handleSignOut(); setMobileNav(false); }} style={{ padding: "11px 24px", fontSize: "14px", fontWeight: 600, border: "1.5px solid rgba(239,68,68,0.3)", color: "#ef4444", borderRadius: "12px", background: "transparent", cursor: "pointer" }}>
-            Sign Out
-          </button>
-        </div>
+        <>
+          <div className="mobile-nav-backdrop" onClick={() => setMobileNav(false)} />
+          <div className="mobile-nav">
+            <div className="mobile-nav-header">
+              <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }} onClick={() => setMobileNav(false)}>
+                <span style={{ width: "28px", height: "28px", borderRadius: "7px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Triangle size={12} color="#fff" fill="#fff" />
+                </span>
+                <span className="brand" style={{ color: "#1a1a2e", fontSize: "18px", fontWeight: 800 }}>EMEREN</span>
+              </Link>
+              <button onClick={() => setMobileNav(false)} style={{ width: "32px", height: "32px", borderRadius: "8px", border: "none", background: "rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <X size={16} color="#374151" />
+              </button>
+            </div>
+            <nav className="mobile-nav-links">
+              {([["Shop","/shop"],["Services","/services"],["Contact","/contact"],["About Us","/about"]] as [string,string][]).map(([label,href]) => (
+                <Link key={href} href={href} className="mobile-nav-link" onClick={() => setMobileNav(false)}>
+                  <span className="link-icon"><ArrowRight size={15} color="#d97706" /></span>
+                  {label}
+                </Link>
+              ))}
+              <div style={{ height: "1px", background: "rgba(0,0,0,0.06)", margin: "4px 12px" }} />
+              <Link href="/my-units" className="mobile-nav-link" style={{ color: "#d97706" }} onClick={() => setMobileNav(false)}>
+                <span className="link-icon"><AirVent size={15} color="#d97706" /></span>
+                My Units
+              </Link>
+              <Link href="/profile" className="mobile-nav-link" onClick={() => setMobileNav(false)}>
+                <span className="link-icon"><User size={15} color="#6b7280" /></span>
+                My Profile
+              </Link>
+            </nav>
+            <div className="mobile-nav-footer">
+              <button onClick={() => { handleSignOut(); setMobileNav(false); }} className="mobile-nav-link" style={{ color: "#ef4444" }}>
+                <LogOut size={15} /> Sign Out
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
       {/* ── Main content ───────────────────────────────────────────────────── */}
