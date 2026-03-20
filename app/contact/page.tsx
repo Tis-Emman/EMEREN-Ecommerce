@@ -273,6 +273,7 @@ export default function ContactPage() {
         @media (max-width: 767px) {
           .contact-grid { grid-template-columns: 1fr !important; }
           .info-grid { grid-template-columns: 1fr !important; }
+          .form-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -527,7 +528,7 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: "6px", letterSpacing: "0.02em" }}>Full Name</label>
                     <input required type="text" placeholder="Juan dela Cruz" value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} onFocus={() => setFocused("name")} onBlur={() => setFocused(null)} style={inputStyle("name")} />

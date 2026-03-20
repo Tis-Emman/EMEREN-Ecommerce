@@ -1114,6 +1114,13 @@ export default function ServicesPage() {
           display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
         }
         .mobile-nav-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 4px 12px; }
+
+        /* ── Mobile content ── */
+        @media (max-width: 767px) {
+          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .packages-grid { grid-template-columns: 1fr !important; }
+          .hero-title { font-size: 32px !important; }
+        }
       `}</style>
 
       {/* ── Navbar ── */}
@@ -1295,7 +1302,7 @@ export default function ServicesPage() {
         </div>
 
         {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "16px", marginTop: "40px", animation: "fadeUp .4s ease .1s both" }}>
+        <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "16px", marginTop: "40px", animation: "fadeUp .4s ease .1s both" }}>
           {[
             { icon: <BadgeCheck size={18} color="#d97706" />,                       value: "500+",      label: "Jobs Completed" },
             { icon: <Star size={18} color="#d97706" fill="#d97706" />,              value: "4.9",       label: "Avg. Rating" },

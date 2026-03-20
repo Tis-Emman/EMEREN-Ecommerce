@@ -457,7 +457,7 @@ export default function AboutPage() {
             { num: "500+", label: "Units Sold", sub: "Across Luzon" },
             { num: "12",   label: "Top Brands",   sub: "Curated selection" },
             { num: "98%",  label: "Satisfaction", sub: "Customer rated" },
-            { num: "2019", label: "Founded",      sub: "Baliuag, Bulacan" },
+            { num: "2022", label: "Founded",      sub: "Baliuag, Bulacan" },
           ].map((s, i) => (
             <div key={i} style={{ padding: "40px 24px", textAlign: "center", borderRight: i < 3 ? "1px solid rgba(0,0,0,0.07)" : "none" }}>
               <div className="stat-num" style={{ fontSize: "clamp(32px, 4vw, 48px)", fontWeight: 900, color: "#d97706", lineHeight: 1 }}>{s.num}</div>
@@ -512,7 +512,7 @@ export default function AboutPage() {
               <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>— Enrico Dela Pena, Founder</p>
 
               <div style={{ marginTop: "32px", paddingTop: "24px", borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", gap: "24px" }}>
-                {[{ icon: <MapPin size={14} color="#d97706" />, text: "Baliuag, Bulacan" }, { icon: <Award size={14} color="#d97706" />, text: "Est. 2019" }].map((b, i) => (
+                {[{ icon: <MapPin size={14} color="#d97706" />, text: "Baliuag, Bulacan" }, { icon: <Award size={14} color="#d97706" />, text: "Est. 2022" }].map((b, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#6b7280" }}>{b.icon}{b.text}</div>
                 ))}
               </div>

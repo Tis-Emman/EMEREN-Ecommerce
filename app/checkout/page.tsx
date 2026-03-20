@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Triangle, ArrowRight, ShoppingCart, ChevronRight,
   MapPin, CreditCard, Banknote, Check, Loader2,
-  User, LogOut, AirVent, Building2,
+  User, LogOut, AirVent, Building2, Menu, X,
 } from "lucide-react";
 import { createClient, type Database } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth-context";
@@ -48,6 +48,7 @@ export default function CheckoutPage() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [placed, setPlaced] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState("");
   const [error, setError] = useState("");
 
@@ -255,6 +256,54 @@ export default function CheckoutPage() {
         .place-btn { width:100%; padding:15px; background:#d97706; color:#fff; font-weight:700; font-size:15px; border:none; border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .15s,transform .15s; box-shadow:0 4px 16px rgba(217,119,6,0.35); font-family:'Plus Jakarta Sans',sans-serif; }
         .place-btn:hover:not(:disabled) { background:#b45309; transform:translateY(-1px); }
         .place-btn:disabled { opacity:.6; cursor:not-allowed; }
+
+        /* ── Nav ── */
+        .desktop-only { display: none !important; }
+        .nav-bar { display: flex; align-items: center; justify-content: space-between; }
+        @media (min-width: 768px) {
+          .desktop-only { display: flex !important; }
+          .mobile-menu-btn { display: none !important; }
+        }
+
+        /* ── Mobile Nav Drawer ── */
+        .mobile-nav-backdrop {
+          position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+          backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+          z-index: 45; animation: fadeUp .2s ease both;
+        }
+        .mobile-nav {
+          position: fixed; top: 0; right: 0; bottom: 0;
+          width: min(320px, 88vw); background: #faf9f6; z-index: 50;
+          display: flex; flex-direction: column;
+          box-shadow: -8px 0 40px rgba(0,0,0,0.14);
+          animation: slideInRight .25s cubic-bezier(.22,1,.36,1) both;
+          overflow-y: auto;
+        }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .mobile-nav-header {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 18px 20px 16px; border-bottom: 1px solid rgba(0,0,0,0.07); flex-shrink: 0;
+        }
+        .mobile-nav-links { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; }
+        .mobile-nav-link {
+          display: flex; align-items: center; gap: 12px; padding: 13px 12px;
+          border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 15px; font-weight: 600; color: #374151; text-decoration: none;
+          transition: background .15s, color .15s; cursor: pointer;
+          background: none; border: none; width: 100%; text-align: left;
+        }
+        .mobile-nav-link:hover { background: rgba(217,119,6,0.07); color: #d97706; }
+        .mobile-nav-footer {
+          padding: 16px 20px 28px; border-top: 1px solid rgba(0,0,0,0.07);
+          display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
+        }
+
+        /* ── Mobile layout ── */
+        @media (max-width: 767px) {
+          .main-grid { grid-template-columns: 1fr !important; }
+          .form-grid { grid-template-columns: 1fr !important; }
+          .summary-sticky { position: static !important; }
+        }
       `}</style>
 
       {/* Navbar */}
@@ -279,7 +328,7 @@ export default function CheckoutPage() {
               </Link>
 
               {user && (
-                <div style={{ position: "relative" }}>
+                <div style={{ position: "relative" }} className="desktop-only">
                   <button
                     onClick={() => setUserMenuOpen((v) => !v)}
                     style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
@@ -313,10 +362,54 @@ export default function CheckoutPage() {
                   )}
                 </div>
               )}
+
+              {/* Mobile hamburger */}
+              <button className="mobile-menu-btn" onClick={() => setMobileNavOpen((v) => !v)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer" }}
+                aria-label="Toggle menu">
+                {mobileNavOpen ? <X size={18} color="#1a1a2e" /> : <Menu size={18} color="#1a1a2e" />}
+              </button>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Mobile Nav Drawer */}
+      {mobileNavOpen && (
+        <>
+          <div className="mobile-nav-backdrop" onClick={() => setMobileNavOpen(false)} />
+          <div className="mobile-nav">
+            <div className="mobile-nav-header">
+              <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }} onClick={() => setMobileNavOpen(false)}>
+                <span style={{ width: "28px", height: "28px", borderRadius: "7px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Triangle size={12} color="#fff" fill="#fff" />
+                </span>
+                <span className="brand" style={{ color: "#1a1a2e", fontSize: "18px", fontWeight: 800 }}>EMEREN</span>
+              </Link>
+              <button onClick={() => setMobileNavOpen(false)} style={{ width: "32px", height: "32px", borderRadius: "8px", border: "none", background: "rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <X size={16} color="#374151" />
+              </button>
+            </div>
+            <nav className="mobile-nav-links">
+              {[["Shop", "/shop"], ["Services", "/services"], ["About Us", "/about"], ["Contact Us", "/contact"]].map(([label, href]) => (
+                <Link key={label} href={href} className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
+                  <ArrowRight size={15} color="#d97706" />
+                  {label}
+                </Link>
+              ))}
+            </nav>
+            <div className="mobile-nav-footer">
+              {user ? (
+                <button onClick={handleSignOut} className="mobile-nav-link" style={{ color: "#ef4444" }}>
+                  <LogOut size={15} /> Sign Out
+                </button>
+              ) : (
+                <Link href="/auth/signin" className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}><User size={15} /> Sign In</Link>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Main */}
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "100px 24px 80px" }}>
@@ -348,7 +441,7 @@ export default function CheckoutPage() {
             <Link href="/shop" style={{ padding: "12px 24px", borderRadius: "12px", background: "#d97706", color: "#fff", fontWeight: 700, textDecoration: "none", fontSize: "14px" }}>Browse Products</Link>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "24px", alignItems: "start" }}>
+          <div className="main-grid" style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "24px", alignItems: "start" }}>
 
             {/* Left: form */}
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -358,7 +451,7 @@ export default function CheckoutPage() {
                 <h2 className="outfit" style={{ fontSize: "17px", fontWeight: 800, color: "#1a1a2e", marginBottom: "18px", display: "flex", alignItems: "center", gap: "8px" }}>
                   <MapPin size={17} color="#d97706" /> Delivery Details
                 </h2>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                   <div>
                     <label className="field-label">Full Name *</label>
                     <input className="field-input" placeholder="Juan dela Cruz" value={form.fullName} onChange={(e) => handleChange("fullName", e.target.value)} />
@@ -431,7 +524,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Right: summary */}
-            <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "20px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", position: "sticky", top: "88px", animation: "fadeUp .4s ease both" }}>
+            <div className="summary-sticky" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "20px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", position: "sticky", top: "88px", animation: "fadeUp .4s ease both" }}>
               <h2 className="outfit" style={{ fontSize: "17px", fontWeight: 800, color: "#1a1a2e", marginBottom: "18px" }}>Order Summary</h2>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>

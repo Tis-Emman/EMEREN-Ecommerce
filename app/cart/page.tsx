@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Triangle, ArrowRight, ShoppingCart, Trash2, Plus, Minus,
-  Tag, Truck, Shield, Wrench, ChevronRight, X, Check, User, LogOut, AirVent,
+  Tag, Truck, Shield, Wrench, ChevronRight, X, Check, User, LogOut, AirVent, Menu,
 } from "lucide-react";
 import { createClient, type Database } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth-context";
@@ -42,6 +42,7 @@ export default function CartPage() {
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Scroll effect
@@ -202,21 +203,76 @@ export default function CartPage() {
         .promo-input.error { border-color:#ef4444; }
         .promo-input.success { border-color:#22c55e; }
         .perks-row { display:flex; flex-direction:column; gap:10px; padding:16px; background:rgba(217,119,6,0.04); border:1px solid rgba(217,119,6,0.12); border-radius:14px; }
+
+        /* ── Nav ── */
+        .desktop-only { display: none !important; }
+        .nav-bar { display: flex; align-items: center; justify-content: space-between; }
+        @media (min-width: 768px) {
+          .desktop-only { display: flex !important; }
+          .mobile-menu-btn { display: none !important; }
+          .nav-bar { display: grid; grid-template-columns: 1fr auto 1fr; }
+        }
+
+        /* ── Mobile Nav Drawer ── */
+        .mobile-nav-backdrop {
+          position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+          backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+          z-index: 45; animation: fadeUp .2s ease both;
+        }
+        .mobile-nav {
+          position: fixed; top: 0; right: 0; bottom: 0;
+          width: min(320px, 88vw); background: #faf9f6; z-index: 50;
+          display: flex; flex-direction: column;
+          box-shadow: -8px 0 40px rgba(0,0,0,0.14);
+          animation: slideInRight .25s cubic-bezier(.22,1,.36,1) both;
+          overflow-y: auto;
+        }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .mobile-nav-header {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 18px 20px 16px; border-bottom: 1px solid rgba(0,0,0,0.07); flex-shrink: 0;
+        }
+        .mobile-nav-links { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; }
+        .mobile-nav-link {
+          display: flex; align-items: center; gap: 12px; padding: 13px 12px;
+          border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 15px; font-weight: 600; color: #374151; text-decoration: none;
+          transition: background .15s, color .15s; cursor: pointer;
+          background: none; border: none; width: 100%; text-align: left;
+        }
+        .mobile-nav-link:hover { background: rgba(217,119,6,0.07); color: #d97706; }
+        .mobile-nav-link .link-icon {
+          width: 34px; height: 34px; border-radius: 9px; background: rgba(0,0,0,0.04);
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s;
+        }
+        .mobile-nav-link:hover .link-icon { background: rgba(217,119,6,0.12); }
+        .mobile-nav-footer {
+          padding: 16px 20px 28px; border-top: 1px solid rgba(0,0,0,0.07);
+          display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
+        }
+        .mobile-nav-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 4px 12px; }
+
+        /* ── Mobile layout ── */
+        @media (max-width: 767px) {
+          .main-grid { grid-template-columns: 1fr !important; }
+          .summary-card { position: static !important; }
+          .cart-item { padding: 14px !important; gap: 10px !important; }
+        }
       `}</style>
 
       {/* Navbar */}
       <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50 }}>
         <div className={scrolled ? "glass" : ""} style={{ transition: "all .3s", borderBottom: scrolled ? undefined : "1px solid transparent" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px", height: "68px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
+          <div className="nav-bar" style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px", height: "68px", gap: "16px" }}>
+            <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none", flexShrink: 0 }}>
               <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 3px 10px rgba(217,119,6,0.3)" }}>
                 <Triangle size={13} color="#fff" fill="#fff" />
               </span>
               <span className="brand" style={{ color: "#1a1a2e", fontSize: "20px", fontWeight: 800 }}>EMEREN</span>
             </Link>
 
-            <nav style={{ display: "flex", alignItems: "center", gap: "32px" }} className="hidden md:flex">
-              {[["Products", "/shop"], ["Features", "/#features"], ["About Us", "/about"], ["Contact Us", "/#contact"]].map(([label, href]) => (
+            <nav className="desktop-only" style={{ alignItems: "center", gap: "28px", justifyContent: "center" }}>
+              {[["Shop", "/shop"], ["Services", "/services"], ["About Us", "/about"], ["Contact Us", "/contact"]].map(([label, href]) => (
                 <Link key={label} href={href} className="nav-link"
                   style={{ color: "#6b7280", fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color .2s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1a2e")}
@@ -225,7 +281,7 @@ export default function CartPage() {
               ))}
             </nav>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
               {/* Cart icon (active) */}
               <div style={{ position: "relative", width: "40px", height: "40px", borderRadius: "12px", border: "1.5px solid #d97706", background: "rgba(217,119,6,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <ShoppingCart size={17} color="#d97706" />
@@ -237,7 +293,7 @@ export default function CartPage() {
               </div>
 
               {user ? (
-                <div style={{ position: "relative" }} ref={userMenuRef}>
+                <div style={{ position: "relative" }} ref={userMenuRef} className="desktop-only">
                   <button
                     onClick={() => setUserMenuOpen((v) => !v)}
                     style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
@@ -284,20 +340,67 @@ export default function CartPage() {
                 </div>
               ) : (
                 <>
-                  <Link href="/auth/signin" style={{ padding: "8px 18px", fontSize: "13px", fontWeight: 600, textDecoration: "none", color: "#374151", borderRadius: "12px", border: "1.5px solid rgba(0,0,0,0.12)", transition: "all .2s" }}
+                  <Link href="/auth/signin" className="desktop-only" style={{ alignItems: "center", padding: "8px 18px", fontSize: "13px", fontWeight: 600, textDecoration: "none", color: "#374151", borderRadius: "12px", border: "1.5px solid rgba(0,0,0,0.12)", transition: "all .2s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(217,119,6,.5)"; e.currentTarget.style.color = "#d97706"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; e.currentTarget.style.color = "#374151"; }}
                   >Sign In</Link>
-                  <Link href="/auth/signup" style={{ padding: "9px 20px", fontSize: "13px", fontWeight: 700, textDecoration: "none", color: "#fff", borderRadius: "12px", background: "#d97706", display: "flex", alignItems: "center", gap: "6px", boxShadow: "0 4px 14px rgba(217,119,6,0.35)", transition: "all .15s" }}
+                  <Link href="/auth/signup" className="desktop-only" style={{ alignItems: "center", gap: "6px", padding: "9px 20px", fontSize: "13px", fontWeight: 700, textDecoration: "none", color: "#fff", borderRadius: "12px", background: "#d97706", boxShadow: "0 4px 14px rgba(217,119,6,0.35)", transition: "all .15s" }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = "#b45309")}
                     onMouseLeave={(e) => (e.currentTarget.style.background = "#d97706")}
                   >Get Started <ArrowRight size={13} /></Link>
                 </>
               )}
+
+              {/* Mobile hamburger */}
+              <button className="mobile-menu-btn" onClick={() => setMobileNavOpen((v) => !v)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "10px", border: "1.5px solid rgba(0,0,0,0.12)", background: "transparent", cursor: "pointer" }}
+                aria-label="Toggle menu">
+                {mobileNavOpen ? <X size={18} color="#1a1a2e" /> : <Menu size={18} color="#1a1a2e" />}
+              </button>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Mobile Nav Drawer */}
+      {mobileNavOpen && (
+        <>
+          <div className="mobile-nav-backdrop" onClick={() => setMobileNavOpen(false)} />
+          <div className="mobile-nav">
+            <div className="mobile-nav-header">
+              <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }} onClick={() => setMobileNavOpen(false)}>
+                <span style={{ width: "28px", height: "28px", borderRadius: "7px", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Triangle size={12} color="#fff" fill="#fff" />
+                </span>
+                <span className="brand" style={{ color: "#1a1a2e", fontSize: "18px", fontWeight: 800 }}>EMEREN</span>
+              </Link>
+              <button onClick={() => setMobileNavOpen(false)} style={{ width: "32px", height: "32px", borderRadius: "8px", border: "none", background: "rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <X size={16} color="#374151" />
+              </button>
+            </div>
+            <nav className="mobile-nav-links">
+              {[["Shop", "/shop"], ["Services", "/services"], ["About Us", "/about"], ["Contact Us", "/contact"]].map(([label, href]) => (
+                <Link key={label} href={href} className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}>
+                  <span className="link-icon"><ArrowRight size={15} color="#d97706" /></span>
+                  {label}
+                </Link>
+              ))}
+            </nav>
+            <div className="mobile-nav-footer">
+              {user ? (
+                <button onClick={handleSignOut} className="mobile-nav-link" style={{ color: "#ef4444" }}>
+                  <LogOut size={15} /> Sign Out
+                </button>
+              ) : (
+                <>
+                  <Link href="/auth/signin" className="mobile-nav-link" onClick={() => setMobileNavOpen(false)}><User size={15} /> Sign In</Link>
+                  <Link href="/auth/signup" onClick={() => setMobileNavOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "13px", borderRadius: "12px", background: "#d97706", color: "#fff", fontWeight: 700, fontSize: "14px", textDecoration: "none" }}>Get Started <ArrowRight size={14} /></Link>
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Main */}
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "100px 24px 80px" }}>
@@ -338,7 +441,7 @@ export default function CartPage() {
             </Link>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "24px", alignItems: "start" }}>
+          <div className="main-grid" style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "24px", alignItems: "start" }}>
 
             {/* Cart items */}
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>

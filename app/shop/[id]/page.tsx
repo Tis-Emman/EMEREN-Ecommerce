@@ -268,6 +268,15 @@ export default function ProductPage() {
           display:flex; flex-direction:column; gap:10px; flex-shrink:0;
         }
         .mobile-nav-divider { height:1px; background:rgba(0,0,0,0.06); margin:4px 12px; }
+
+        /* ── Mobile content ── */
+        @media (max-width:767px) {
+          .product-hero-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+          .trust-grid { grid-template-columns: repeat(3,1fr) !important; }
+          .feature-grid { grid-template-columns: 1fr !important; }
+          .spec-cols { grid-template-columns: 1fr 1fr !important; }
+          .add-btn { width: 100%; justify-content: center; }
+        }
       `}</style>
 
       {/* ── Navbar ── */}
@@ -441,7 +450,7 @@ export default function ProductPage() {
         </div>
 
         {/* ── Hero ── */}
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"48px", marginBottom:"64px", alignItems:"start" }}>
+        <div className="product-hero-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"48px", marginBottom:"64px", alignItems:"start" }}>
 
           {/* Image */}
           <div style={{ animation:"fadeUp .4s ease .05s both" }}>
@@ -477,7 +486,7 @@ export default function ProductPage() {
             </div>
 
             {/* Trust badges */}
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"10px", marginTop:"16px" }}>
+            <div className="trust-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"10px", marginTop:"16px" }}>
               {[
                 { icon:<Truck  size={15} color="#d97706" />, label:"Free Delivery", sub:"Baliuag & nearby" },
                 { icon:<Wrench size={15} color="#d97706" />, label:"Free Install",   sub:"Standard setup" },
@@ -679,7 +688,7 @@ export default function ProductPage() {
         <div style={{ marginBottom:"64px", animation:"fadeUp .4s ease .2s both" }}>
           <p style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", color:"#d97706", marginBottom:"8px", fontFamily:"'Outfit',sans-serif" }}>Visit Us</p>
           <h2 className="outfit" style={{ fontSize:"26px", fontWeight:900, color:"#1a1a2e", letterSpacing:"-0.5px", marginBottom:"24px" }}>Our Store in Baliuag</h2>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"20px" }}>
+          <div className="feature-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"20px" }}>
             <div style={{ borderRadius:"20px", overflow:"hidden", border:"1px solid rgba(0,0,0,0.08)", aspectRatio:"16/9" }}>
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3854.4787791348845!2d120.90031068436424!3d14.966104630820446!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397001af00e9c79%3A0x8392e70f15210957!2sEmeren%20Aircon%20%26%20Refrigeration%20Parts%20%26%20Services!5e0!3m2!1sen!2sph!4v1773937329840!5m2!1sen!2sph"
@@ -721,7 +730,7 @@ export default function ProductPage() {
                 View all <ArrowRight size={13} />
               </Link>
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"16px" }}>
+            <div className="spec-cols" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"16px" }}>
               {related.map((rp) => {
                 const lowestPrice = Math.min(...rp.variants.map((v) => v.price));
                 return (
