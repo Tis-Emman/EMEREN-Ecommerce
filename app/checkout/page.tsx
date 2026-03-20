@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Triangle, ArrowRight, ShoppingCart, ChevronRight,
   MapPin, CreditCard, Banknote, Check, Loader2,
-  User, LogOut, AirVent,
+  User, LogOut, AirVent, Building2,
 } from "lucide-react";
 import { createClient, type Database } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth-context";
@@ -25,13 +25,14 @@ interface CartItem {
   type: string;
   tag: string;
   qty: number;
+  image: string;
 }
 
 const PAYMENT_METHODS = [
-  { id: "gcash", label: "GCash", icon: "📱" },
-  { id: "cod", label: "Cash on Delivery", icon: "💵" },
-  { id: "bank_transfer", label: "Bank Transfer", icon: "🏦" },
-  { id: "card", label: "Credit / Debit Card", icon: "💳" },
+  { id: "gcash",         label: "GCash",                icon: null,            img: "/images/icons/payment methods/gcash.png" },
+  { id: "cod",           label: "Cash on Delivery",     icon: "Banknote",      img: null },
+  { id: "bank_transfer", label: "Bank Transfer",        icon: "Building2",     img: null },
+  { id: "card",          label: "Credit / Debit Card",  icon: "CreditCard",    img: null },
 ];
 
 export default function CheckoutPage() {
@@ -93,6 +94,7 @@ export default function CheckoutPage() {
           type: product?.type ?? "",
           tag: variant?.tag ?? "",
           qty: row.quantity,
+          image: `/images/products/${row.product_id}.png`,
         };
       });
       const selectedIds: string[] = JSON.parse(localStorage.getItem("checkout_selected_ids") ?? "[]");
@@ -347,8 +349,16 @@ export default function CheckoutPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                   {PAYMENT_METHODS.map((m) => (
                     <div key={m.id} className={`payment-option ${form.payment === m.id ? "selected" : ""}`} onClick={() => handleChange("payment", m.id)}>
-                      <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(217,119,6,0.07)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", flexShrink: 0 }}>
-                        {m.icon}
+                      <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(217,119,6,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+                        {m.img ? (
+                          <img src={m.img} alt={m.label} style={{ width: "28px", height: "28px", objectFit: "contain" }} />
+                        ) : m.icon === "Banknote" ? (
+                          <Banknote size={18} color="#d97706" />
+                        ) : m.icon === "Building2" ? (
+                          <Building2 size={18} color="#d97706" />
+                        ) : m.icon === "CreditCard" ? (
+                          <CreditCard size={18} color="#d97706" />
+                        ) : null}
                       </div>
                       <span style={{ fontSize: "14px", fontWeight: 600, color: "#1a1a2e", flex: 1 }}>{m.label}</span>
                       <div style={{ width: "18px", height: "18px", borderRadius: "50%", border: form.payment === m.id ? "none" : "1.5px solid rgba(0,0,0,0.15)", background: form.payment === m.id ? "#d97706" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>

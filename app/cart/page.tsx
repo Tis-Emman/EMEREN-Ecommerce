@@ -26,6 +26,7 @@ interface CartItem {
   type: string;
   tag: string;
   qty: number;
+  image: string;
 }
 
 export default function CartPage() {
@@ -87,6 +88,7 @@ export default function CartPage() {
           type: product?.type ?? "",
           tag: variant?.tag ?? "",
           qty: row.quantity,
+          image: `/images/products/${row.product_id}.png`,
         };
       });
       setCart(items);
@@ -360,8 +362,9 @@ export default function CartPage() {
                       {selectedIds.has(item.id) && <Check size={11} color="#fff" strokeWidth={3} />}
                     </div>
                   </button>
-                  <div style={{ width: "90px", height: "90px", borderRadius: "14px", background: "radial-gradient(ellipse at center, rgba(217,119,6,0.08) 0%, #f8f7f4 70%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <span style={{ fontSize: "38px", filter: "drop-shadow(0 2px 8px rgba(217,119,6,0.15))" }}>❄️</span>
+                  <div style={{ width: "90px", height: "90px", borderRadius: "14px", background: "radial-gradient(ellipse at center, rgba(217,119,6,0.08) 0%, #f8f7f4 70%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+                    <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "8px" }} onError={(e) => { e.currentTarget.style.display = "none"; (e.currentTarget.nextSibling as HTMLElement).style.display = "flex"; }} />
+                    <span style={{ fontSize: "38px", display: "none", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>❄️</span>
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
