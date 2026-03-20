@@ -20,6 +20,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { CartPreview } from "@/components/CartPreview";
 import { useAuth } from "@/lib/auth-context";
 import {
   Triangle, AirVent, Plus, Trash2, Wrench,
@@ -79,7 +80,6 @@ export default function MyUnitsPage() {
   // Auth
   const { profileName } = useAuth();
   const [authUser,     setAuthUser]     = useState<{ email: string } | null>(null);
-  const [cartCount,    setCartCount]    = useState(0);
   const [scrolled,     setScrolled]     = useState(false);
   const [mobileNav,    setMobileNav]    = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -104,8 +104,6 @@ export default function MyUnitsPage() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.replace("/auth/signin"); return; }
       setAuthUser({ email: data.user.email ?? "" });
-      const { data: rows } = await supabase.from("cart_items").select("quantity").eq("user_id", data.user.id);
-      setCartCount(rows?.reduce((s, r) => s + r.quantity, 0) ?? 0);
       loadUnits(supabase);
     });
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -260,15 +258,7 @@ export default function MyUnitsPage() {
 
             {/* Right */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
-              <Link href="/cart" style={{ position: "relative", width: "40px", height: "40px", borderRadius: "12px", border: "1.5px solid rgba(0,0,0,0.1)", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .2s", flexShrink: 0, textDecoration: "none" }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(217,119,6,.4)"; e.currentTarget.style.background = "#fffbf2"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"; e.currentTarget.style.background = "#fff"; }}
-              >
-                <ShoppingCart size={17} color="#374151" />
-                {cartCount > 0 && (
-                  <span style={{ position: "absolute", top: "-5px", right: "-5px", minWidth: "17px", height: "17px", borderRadius: "999px", background: "#d97706", color: "#fff", fontSize: "9px", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", border: "2px solid #f8f7f4" }}>{cartCount}</span>
-                )}
-              </Link>
+              <CartPreview />
               {/* User dropdown */}
               <div style={{ position: "relative" }} ref={userMenuRef}>
                 <button

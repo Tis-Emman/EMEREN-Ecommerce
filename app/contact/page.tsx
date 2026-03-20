@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Triangle,
+  ShoppingCart,
   User,
   LogOut,
   Menu,
@@ -20,6 +21,7 @@ import {
   AirVent,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { CartPreview } from "@/components/CartPreview";
 import { useAuth } from "@/lib/auth-context";
 
 export default function ContactPage() {
@@ -307,6 +309,7 @@ export default function ContactPage() {
             </nav>
 
             <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
+              <CartPreview />
               {user ? (
                 <div style={{ position: "relative" }} ref={userMenuRef}>
                   <button onClick={() => setUserMenuOpen((v) => !v)}

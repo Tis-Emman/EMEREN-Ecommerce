@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import { CartPreview } from "@/components/CartPreview";
 import { useAuth } from "@/lib/auth-context";
 import {
   Triangle, ArrowRight, Search, SlidersHorizontal, Star,
@@ -34,7 +35,6 @@ export default function ShopPage() {
   const [maxPrice,      setMaxPrice]      = useState(350000);
   const [filterOpen,    setFilterOpen]    = useState(false);
   const [sortOpen,      setSortOpen]      = useState(false);
-  const [cartCount,     setCartCount]     = useState(0);
   const [user,          setUser]          = useState<{ email: string } | null>(null);
   const [userMenuOpen,  setUserMenuOpen]  = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -290,17 +290,7 @@ export default function ShopPage() {
 
             {/* Auth + cart */}
             <div style={{ display:"flex", alignItems:"center", gap:"10px", justifyContent:"flex-end" }}>
-              <Link href="/cart" style={{ position:"relative", width:"40px", height:"40px", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.1)", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none", transition:"all .2s", flexShrink:0 }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor="rgba(217,119,6,.4)"; e.currentTarget.style.background="#fffbf2"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor="rgba(0,0,0,0.1)"; e.currentTarget.style.background="#fff"; }}
-              >
-                <ShoppingCart size={17} color="#374151" />
-                {cartCount > 0 && (
-                  <span style={{ position:"absolute", top:"-5px", right:"-5px", width:"17px", height:"17px", borderRadius:"50%", background:"#d97706", color:"#fff", fontSize:"9px", fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    {cartCount > 9 ? "9+" : cartCount}
-                  </span>
-                )}
-              </Link>
+              <CartPreview />
 
               {user ? (
                 <div style={{ position:"relative" }} ref={userMenuRef}>

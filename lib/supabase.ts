@@ -73,6 +73,7 @@ export type Database = {
           product_id: string;
           variant_hp: string;
           quantity: number;
+          tube_length: number | null;
           created_at: string;
         };
         Insert: {
@@ -80,9 +81,11 @@ export type Database = {
           product_id: string;
           variant_hp: string;
           quantity: number;
+          tube_length?: number | null;
         };
         Update: {
           quantity?: number;
+          tube_length?: number | null;
         };
         Relationships: [];
       };
@@ -126,6 +129,7 @@ export type Database = {
           variant_hp: string;
           price: number;
           quantity: number;
+          tube_length: number | null;
         };
         Insert: {
           order_id: string;
@@ -135,6 +139,7 @@ export type Database = {
           variant_hp: string;
           price: number;
           quantity: number;
+          tube_length?: number | null;
         };
         Update: {
           quantity?: number;

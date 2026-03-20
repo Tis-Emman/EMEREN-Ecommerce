@@ -27,6 +27,7 @@ interface CartItem {
   tag: string;
   qty: number;
   image: string;
+  tubeFeet: number | null;
 }
 
 export default function CartPage() {
@@ -89,10 +90,11 @@ export default function CartPage() {
           tag: variant?.tag ?? "",
           qty: row.quantity,
           image: `/images/products/${row.product_id}.png`,
+          tubeFeet: row.tube_length ?? null,
         };
       });
       setCart(items);
-      setSelectedIds(new Set(items.map((i) => i.id)));
+      setSelectedIds(new Set());
       setLoadingCart(false);
     });
   }, [user]);
@@ -109,16 +111,18 @@ export default function CartPage() {
     const newQty = Math.max(1, item.qty + delta);
     setCart((prev) => prev.map((c) => c.id === id ? { ...c, qty: newQty } : c));
     const supabase = createClient();
-    await (supabase.from("cart_items") as any).update({ quantity: newQty }).eq("id", id);
+    const { error } = await (supabase.from("cart_items") as any).update({ quantity: newQty }).eq("id", id);
+    if (error) setCart((prev) => prev.map((c) => c.id === id ? { ...c, qty: item.qty } : c));
   };
 
   const removeItem = async (id: string) => {
     setRemovingId(id);
-    setTimeout(async () => {
+    const supabase = createClient();
+    await supabase.from("cart_items").delete().eq("id", id);
+    setTimeout(() => {
       setCart((prev) => prev.filter((c) => c.id !== id));
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
       setRemovingId(null);
-      const supabase = createClient();
-      await supabase.from("cart_items").delete().eq("id", id);
     }, 300);
   };
 
@@ -376,6 +380,16 @@ export default function CartPage() {
                           {[item.btu, item.sqm, item.type].filter(Boolean).map((t) => (
                             <span key={t} style={{ padding: "2px 7px", borderRadius: "5px", fontSize: "11px", color: "#6b7280", background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}>{t}</span>
                           ))}
+                          {item.tubeFeet != null && (
+                            <span style={{ padding: "2px 7px", borderRadius: "5px", fontSize: "11px", color: item.tubeFeet > 10 ? "#d97706" : "#16a34a", background: item.tubeFeet > 10 ? "rgba(217,119,6,0.08)" : "rgba(34,197,94,0.08)", border: `1px solid ${item.tubeFeet > 10 ? "rgba(217,119,6,0.2)" : "rgba(34,197,94,0.2)"}`, fontWeight: 600 }}>
+                              {item.tubeFeet} ft tube{item.tubeFeet > 10 ? ` (+₱${((item.tubeFeet - 10) * 300).toLocaleString()})` : " (included)"}
+                            </span>
+                          )}
+                          {item.tubeFeet === null && (
+                            <span style={{ padding: "2px 7px", borderRadius: "5px", fontSize: "11px", color: "#6b7280", background: "rgba(107,114,128,0.06)", border: "1px solid rgba(107,114,128,0.15)", fontWeight: 600 }}>
+                              🔧 Tube length: TBD on-site
+                            </span>
+                          )}
                           {item.tag && (
                             <span style={{ padding: "2px 7px", borderRadius: "5px", fontSize: "11px", color: "#16a34a", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", fontWeight: 600 }}>{item.tag}</span>
                           )}

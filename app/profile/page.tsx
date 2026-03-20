@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth-context";
+import { CartPreview } from "@/components/CartPreview";
 import {
   Triangle,
   ArrowRight,
@@ -158,7 +160,7 @@ export default function ProfilePage() {
     status: string;
     total: number;
     created_at: string;
-    order_items: { product_name: string; quantity: number }[];
+    order_items: { product_id: string; product_name: string; quantity: number }[];
   };
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
@@ -566,12 +568,7 @@ export default function ProfilePage() {
 
             {/* Auth */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
-              <Link href="/cart" style={{ position: "relative", width: "40px", height: "40px", borderRadius: "12px", border: "1.5px solid rgba(0,0,0,0.1)", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .2s", flexShrink: 0, textDecoration: "none" }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(217,119,6,.4)"; e.currentTarget.style.background = "#fffbf2"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"; e.currentTarget.style.background = "#fff"; }}
-              >
-                <ShoppingCart size={17} color="#374151" />
-              </Link>
+              <CartPreview />
               {/* Avatar — non-clickable identity indicator */}
               <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px", borderRadius: "12px", border: "1.5px solid rgba(217,119,6,0.3)", background: "rgba(217,119,6,0.06)" }}>
                 <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#d97706", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -892,14 +889,20 @@ export default function ProfilePage() {
                     return (
                       <div key={order.id} className="order-row" style={{ animationDelay: `${i * 0.07}s` }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                          <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(217,119,6,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <svg width="24" height="18" viewBox="0 0 88 64" fill="none">
-                              <rect x="4" y="16" width="80" height="36" rx="8" fill="#fff" stroke="rgba(217,119,6,0.3)" strokeWidth="2"/>
-                              <line x1="14" y1="24" x2="14" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
-                              <line x1="20" y1="24" x2="20" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
-                              <line x1="26" y1="24" x2="26" y2="44" stroke="rgba(217,119,6,0.3)" strokeWidth="2" strokeLinecap="round"/>
-                              <circle cx="76" cy="26" r="4" fill="#22c55e" opacity="0.8"/>
-                            </svg>
+                          <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "radial-gradient(ellipse at center, rgba(217,119,6,0.08) 0%, #f8f7f4 70%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+                            {order.order_items[0]?.product_id ? (
+                              <img
+                                src={`/images/products/${order.order_items[0].product_id}.png`}
+                                alt={order.order_items[0].product_name}
+                                style={{ width: "100%", height: "100%", objectFit: "contain", padding: "4px" }}
+                                onError={(e) => { e.currentTarget.style.display = "none"; }}
+                              />
+                            ) : (
+                              <svg width="24" height="18" viewBox="0 0 88 64" fill="none">
+                                <rect x="4" y="16" width="80" height="36" rx="8" fill="#fff" stroke="rgba(217,119,6,0.3)" strokeWidth="2"/>
+                                <circle cx="76" cy="26" r="4" fill="#22c55e" opacity="0.8"/>
+                              </svg>
+                            )}
                           </div>
                           <div>
                             <p style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", marginBottom: "2px" }}>#{order.id.slice(0, 8).toUpperCase()}</p>

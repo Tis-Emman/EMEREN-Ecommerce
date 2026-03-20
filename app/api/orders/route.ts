@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { items, subtotal, promo_discount, delivery_fee, total, delivery_address, payment_method, notes } = body;
+    const { items, subtotal, promo_discount, delivery_fee, total, delivery_address, payment_method, notes, cart_item_ids } = body;
 
     if (!items?.length || !delivery_address || !payment_method) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
       variant_hp: string;
       price: number;
       quantity: number;
+      tube_length?: number | null;
     }) => ({
       order_id: order.id,
       product_id: item.product_id,
@@ -82,13 +83,16 @@ export async function POST(req: NextRequest) {
       variant_hp: item.variant_hp,
       price: item.price,
       quantity: item.quantity,
+      tube_length: item.tube_length ?? null,
     }));
 
     const { error: itemsError } = await (service.from("order_items") as any).insert(orderItems);
     if (itemsError) throw itemsError;
 
-    // Clear cart
-    await service.from("cart_items").delete().eq("user_id", user.id);
+    // Clear only the cart items that were actually ordered (not the entire cart)
+    if (Array.isArray(cart_item_ids) && cart_item_ids.length > 0) {
+      await service.from("cart_items").delete().in("id", cart_item_ids);
+    }
 
     return NextResponse.json({ success: true, order_id: order.id }, { status: 201 });
   } catch (err) {

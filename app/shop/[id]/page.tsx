@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { CartPreview } from "@/components/CartPreview";
 import { useAuth } from "@/lib/auth-context";
 import {
   Triangle, ArrowLeft, ArrowRight, Star, Check, ShoppingCart,
@@ -15,7 +16,7 @@ import { BADGE_COLORS, type Variant, type Product } from "@/lib/products";
 const formatPrice = (n: number) => `₱${n.toLocaleString()}`;
 
 export default function ProductPage() {
-  const { profileName } = useAuth();
+  const { profileName, refreshCartCount } = useAuth();
   const params   = useParams();
   const router   = useRouter();
 
@@ -26,7 +27,6 @@ export default function ProductPage() {
   const [added,         setAdded]         = useState(false);
   const [tubeLength,    setTubeLength]    = useState(10);
   const [tubeUnknown,   setTubeUnknown]   = useState(false);
-  const [cartCount,     setCartCount]     = useState(0);
   const [user,          setUser]          = useState<{ id: string; email: string } | null>(null);
   const [userMenuOpen,  setUserMenuOpen]  = useState(false);
   const [scrolled,      setScrolled]      = useState(false);
@@ -56,9 +56,6 @@ export default function ProductPage() {
       const u = data.user;
       if (u) {
         setUser({ id: u.id, email: u.email ?? "" });
-        supabase.from("cart_items").select("quantity").eq("user_id", u.id).then(({ data: rows }) => {
-          setCartCount(rows?.reduce((s, r) => s + r.quantity, 0) ?? 0);
-        });
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -121,9 +118,11 @@ export default function ProductPage() {
       return;
     }
 
+    const tubeLengthValue = tubeUnknown ? null : tubeLength;
+
     if (existing) {
       const { error: updateErr } = await (supabase.from("cart_items") as any)
-        .update({ quantity: existing.quantity + 1 })
+        .update({ quantity: existing.quantity + 1, tube_length: tubeLengthValue })
         .eq("id", existing.id);
       if (updateErr) {
         console.error("Cart update error:", updateErr);
@@ -131,11 +130,12 @@ export default function ProductPage() {
         return;
       }
     } else {
-      const { error: insertErr } = await supabase.from("cart_items").insert({
+      const { error: insertErr } = await (supabase.from("cart_items") as any).insert({
         user_id: user.id,
         product_id: product.id,
         variant_hp: selectedVariant.hp,
         quantity: 1,
+        tube_length: tubeLengthValue,
       });
       if (insertErr) {
         console.error("Cart insert error:", insertErr);
@@ -145,43 +145,16 @@ export default function ProductPage() {
     }
 
     setAdded(true);
-    setCartCount((c) => c + 1);
+    refreshCartCount();
     setTimeout(() => setAdded(false), 1800);
   };
 
-  const handleBuyNow = async () => {
+  const handleBuyNow = () => {
     if (!user) { router.push("/auth/signin"); return; }
     if (!selectedVariant || !product) return;
-
-    const supabase = createClient();
-    const { data: existing } = await supabase
-      .from("cart_items")
-      .select("id, quantity")
-      .eq("user_id", user.id)
-      .eq("product_id", product.id)
-      .eq("variant_hp", selectedVariant.hp)
-      .maybeSingle();
-
-    let cartItemId = existing?.id ?? null;
-
-    if (existing) {
-      await (supabase.from("cart_items") as any)
-        .update({ quantity: existing.quantity + 1 })
-        .eq("id", existing.id);
-    } else {
-      const { data: inserted } = await (supabase.from("cart_items") as any).insert({
-        user_id: user.id,
-        product_id: product.id,
-        variant_hp: selectedVariant.hp,
-        quantity: 1,
-      }).select().single();
-      cartItemId = inserted?.id ?? null;
-    }
-
-    if (cartItemId) {
-      localStorage.setItem("checkout_selected_ids", JSON.stringify([cartItemId]));
-    }
-    router.push("/checkout");
+    const params = new URLSearchParams({ buyNow: "1", pid: product.id, hp: selectedVariant.hp });
+    if (!tubeUnknown) params.set("tube", String(tubeLength));
+    router.push(`/checkout?${params.toString()}`);
   };
 
   if (productLoading) {
@@ -323,17 +296,7 @@ export default function ProductPage() {
 
             {/* Auth + cart */}
             <div style={{ display:"flex", alignItems:"center", gap:"10px", justifyContent:"flex-end" }}>
-              <Link href="/cart" style={{ position:"relative", width:"40px", height:"40px", borderRadius:"12px", border:"1.5px solid rgba(0,0,0,0.1)", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none", transition:"all .2s", flexShrink:0 }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor="rgba(217,119,6,.4)"; e.currentTarget.style.background="#fffbf2"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor="rgba(0,0,0,0.1)"; e.currentTarget.style.background="#fff"; }}
-              >
-                <ShoppingCart size={17} color="#374151" />
-                {cartCount > 0 && (
-                  <span style={{ position:"absolute", top:"-5px", right:"-5px", width:"17px", height:"17px", borderRadius:"50%", background:"#d97706", color:"#fff", fontSize:"9px", fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    {cartCount > 9 ? "9+" : cartCount}
-                  </span>
-                )}
-              </Link>
+              <CartPreview />
 
               {user ? (
                 <div style={{ position:"relative" }} ref={userMenuRef}>

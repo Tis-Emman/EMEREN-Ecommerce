@@ -26,6 +26,7 @@ interface CartItem {
   tag: string;
   qty: number;
   image: string;
+  tubeFeet: number | null;
 }
 
 const PAYMENT_METHODS = [
@@ -71,6 +72,41 @@ export default function CheckoutPage() {
   // Load cart from Supabase (resolve product details via API)
   useEffect(() => {
     if (!user) { setLoadingCart(false); return; }
+
+    const buyNow = searchParams.get("buyNow");
+    const pid    = searchParams.get("pid");
+    const hp     = searchParams.get("hp");
+    const tube   = searchParams.get("tube");
+
+    // Buy Now flow — skip cart entirely, build item from URL params
+    if (buyNow === "1" && pid && hp) {
+      fetch("/api/products").then(r => r.json()).then((productsJson) => {
+        type P = { id: string; brand: string; series: string; type: string; variants: { hp: string; price: number; orig: number; btu: string; tag: string }[] };
+        const allProducts: P[] = productsJson.products ?? [];
+        const product = allProducts.find((p) => p.id === pid);
+        const variant = product?.variants.find((v) => v.hp === hp);
+        if (!product || !variant) { router.push("/shop"); return; }
+        setCart([{
+          id: `buynow-${pid}-${hp}`,
+          product_id: pid,
+          variant_hp: hp,
+          name: `${product.brand} ${product.series} ${hp}`.trim(),
+          brand: product.brand,
+          price: variant.price,
+          orig: variant.orig,
+          btu: variant.btu ?? "",
+          type: product.type ?? "",
+          tag: variant.tag ?? "",
+          qty: 1,
+          image: `/images/products/${pid}.png`,
+          tubeFeet: tube ? parseInt(tube) : null,
+        }]);
+        setLoadingCart(false);
+      });
+      return;
+    }
+
+    // Normal cart flow
     const supabase = createClient();
     Promise.all([
       supabase.from("cart_items").select("*").eq("user_id", user.id),
@@ -95,19 +131,22 @@ export default function CheckoutPage() {
           tag: variant?.tag ?? "",
           qty: row.quantity,
           image: `/images/products/${row.product_id}.png`,
+          tubeFeet: (row as any).tube_length ?? null,
         };
       });
       const selectedIds: string[] = JSON.parse(localStorage.getItem("checkout_selected_ids") ?? "[]");
-      const filtered = selectedIds.length > 0 ? items.filter((i) => selectedIds.includes(i.id)) : items;
+      const filtered = items.filter((i) => selectedIds.includes(i.id));
+      if (filtered.length === 0) { router.push("/cart"); return; }
       setCart(filtered);
       setLoadingCart(false);
     });
   }, [user]);
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const tubeExtra = cart.reduce((s, i) => s + Math.max(0, (i.tubeFeet ?? 10) - 10) * 300, 0);
   const promoDiscount = promoApplied ? Math.round(subtotal * 0.1) : 0;
   const delivery = subtotal >= 25000 ? 0 : 1500;
-  const total = subtotal - promoDiscount + delivery;
+  const total = subtotal + tubeExtra - promoDiscount + delivery;
   const fmt = (n: number) => `₱${n.toLocaleString()}`;
 
   const handleChange = (field: keyof typeof form, value: string) =>
@@ -127,6 +166,10 @@ export default function CheckoutPage() {
 
     const deliveryAddress = `${form.fullName}, ${form.phone} — ${form.address}, ${form.city}, ${form.province}`;
 
+    const isBuyNow = searchParams.get("buyNow") === "1";
+    // For Buy Now, no cart items to clear. For cart checkout, clear only the ordered items.
+    const cartItemIds = isBuyNow ? [] : cart.map((i) => i.id);
+
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -138,6 +181,7 @@ export default function CheckoutPage() {
           variant_hp: i.variant_hp,
           price: i.price,
           quantity: i.qty,
+          tube_length: i.tubeFeet ?? null,
         })),
         subtotal,
         promo_discount: promoDiscount,
@@ -146,6 +190,7 @@ export default function CheckoutPage() {
         delivery_address: deliveryAddress,
         payment_method: form.payment,
         notes: form.notes || null,
+        cart_item_ids: cartItemIds,
       }),
     });
 
@@ -389,16 +434,35 @@ export default function CheckoutPage() {
             <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.07)", borderRadius: "20px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", position: "sticky", top: "88px", animation: "fadeUp .4s ease both" }}>
               <h2 className="outfit" style={{ fontSize: "17px", fontWeight: 800, color: "#1a1a2e", marginBottom: "18px" }}>Order Summary</h2>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
-                {cart.map((item) => (
-                  <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
-                      {item.qty > 1 && <p style={{ fontSize: "11px", color: "#9ca3af" }}>×{item.qty}</p>}
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
+                {cart.map((item) => {
+                  const extraFeet = Math.max(0, (item.tubeFeet ?? 10) - 10);
+                  const extraCost = extraFeet * 300;
+                  return (
+                    <div key={item.id}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
+                          {item.qty > 1 && <p style={{ fontSize: "11px", color: "#9ca3af" }}>×{item.qty}</p>}
+                        </div>
+                        <span style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", flexShrink: 0 }}>₱{(item.price * item.qty).toLocaleString()}</span>
+                      </div>
+                      {item.tubeFeet === null ? (
+                        <p style={{ fontSize: "11px", color: "#6b7280", marginTop: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
+                          🔧 Tube length TBD on-site
+                        </p>
+                      ) : extraCost === 0 ? (
+                        <p style={{ fontSize: "11px", color: "#16a34a", marginTop: "4px", fontWeight: 600 }}>
+                          ✓ {item.tubeFeet} ft copper tube — included
+                        </p>
+                      ) : (
+                        <p style={{ fontSize: "11px", color: "#d97706", marginTop: "4px", fontWeight: 600 }}>
+                          {item.tubeFeet} ft copper tube — +₱{extraCost.toLocaleString()} ({extraFeet} ft extra)
+                        </p>
+                      )}
                     </div>
-                    <span style={{ fontSize: "13px", fontWeight: 700, color: "#1a1a2e", flexShrink: 0 }}>₱{(item.price * item.qty).toLocaleString()}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div style={{ height: "1px", background: "rgba(0,0,0,0.07)", margin: "16px 0" }} />
@@ -408,6 +472,12 @@ export default function CheckoutPage() {
                   <span style={{ fontSize: "13px", color: "#6b7280" }}>Subtotal</span>
                   <span style={{ fontSize: "13px", fontWeight: 600 }}>{fmt(subtotal)}</span>
                 </div>
+                {tubeExtra > 0 && (
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: "13px", color: "#d97706" }}>Tube extension</span>
+                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#d97706" }}>+{fmt(tubeExtra)}</span>
+                  </div>
+                )}
                 {promoApplied && (
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <span style={{ fontSize: "13px", color: "#d97706" }}>Promo (EMEREN10)</span>

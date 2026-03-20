@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
+  ShoppingCart,
   ChevronDown,
   Zap,
   Smartphone,
@@ -21,6 +22,7 @@ import {
   AirVent,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { CartPreview } from "@/components/CartPreview";
 import { useAuth } from "@/lib/auth-context";
 import { BADGE_COLORS, type Product } from "@/lib/products";
 
@@ -483,6 +485,7 @@ export default function LandingPage() {
 
             {/* Auth buttons + hamburger */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "flex-end" }}>
+              <CartPreview />
               {user ? (
                 <div style={{ position: "relative" }} ref={userMenuRef}>
                   <button
