@@ -38,6 +38,7 @@ export default function CartPage() {
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +90,7 @@ export default function CartPage() {
         };
       });
       setCart(items);
+      setSelectedIds(new Set(items.map((i) => i.id)));
       setLoadingCart(false);
     });
   }, [user]);
@@ -128,11 +130,31 @@ export default function CartPage() {
     }
   };
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const savings = cart.reduce((sum, item) => sum + (item.orig - item.price) * item.qty, 0);
+  const selectedItems = cart.filter((i) => selectedIds.has(i.id));
+  const subtotal = selectedItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const savings = selectedItems.reduce((sum, item) => sum + (item.orig - item.price) * item.qty, 0);
   const promoDiscount = promoApplied ? Math.round(subtotal * 0.1) : 0;
   const delivery = subtotal >= 25000 ? 0 : 1500;
   const total = subtotal - promoDiscount + delivery;
+  const allSelected = cart.length > 0 && selectedIds.size === cart.length;
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIds(allSelected ? new Set() : new Set(cart.map((i) => i.id)));
+  };
+
+  const handleCheckout = () => {
+    if (selectedIds.size === 0) return;
+    localStorage.setItem("checkout_selected_ids", JSON.stringify([...selectedIds]));
+    router.push(`/checkout?promo=${promoApplied ? "EMEREN10" : ""}`);
+  };
   const formatPrice = (n: number) => `₱${n.toLocaleString()}`;
 
   return (
@@ -314,8 +336,30 @@ export default function CartPage() {
 
             {/* Cart items */}
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+
+              {/* Select All row */}
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px", background: "#fff", borderRadius: "12px", border: "1px solid rgba(0,0,0,0.07)" }}>
+                <button onClick={toggleSelectAll} style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                  <div style={{ width: "18px", height: "18px", borderRadius: "5px", border: `2px solid ${allSelected ? "#d97706" : "#d1d5db"}`, background: allSelected ? "#d97706" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {allSelected && <Check size={11} color="#fff" strokeWidth={3} />}
+                  </div>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#374151" }}>Select All</span>
+                </button>
+                {selectedIds.size > 0 && (
+                  <span style={{ fontSize: "12px", color: "#9ca3af", marginLeft: "4px" }}>
+                    {selectedIds.size} of {cart.length} selected
+                  </span>
+                )}
+              </div>
+
               {cart.map((item, i) => (
-                <div key={item.id} className={`cart-item ${removingId === item.id ? "removing" : ""}`} style={{ animationDelay: `${i * 0.07}s` }}>
+                <div key={item.id} className={`cart-item ${removingId === item.id ? "removing" : ""}`} style={{ animationDelay: `${i * 0.07}s`, opacity: selectedIds.has(item.id) ? 1 : 0.5, transition: "opacity .2s" }}>
+                  {/* Checkbox */}
+                  <button onClick={() => toggleSelect(item.id)} style={{ display: "flex", alignSelf: "center", background: "none", border: "none", cursor: "pointer", padding: "4px", flexShrink: 0 }}>
+                    <div style={{ width: "18px", height: "18px", borderRadius: "5px", border: `2px solid ${selectedIds.has(item.id) ? "#d97706" : "#d1d5db"}`, background: selectedIds.has(item.id) ? "#d97706" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {selectedIds.has(item.id) && <Check size={11} color="#fff" strokeWidth={3} />}
+                    </div>
+                  </button>
                   <div style={{ width: "90px", height: "90px", borderRadius: "14px", background: "radial-gradient(ellipse at center, rgba(217,119,6,0.08) 0%, #f8f7f4 70%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <span style={{ fontSize: "38px", filter: "drop-shadow(0 2px 8px rgba(217,119,6,0.15))" }}>❄️</span>
                   </div>
@@ -448,10 +492,15 @@ export default function CartPage() {
 
               <button
                 className="checkout-btn"
-                onClick={() => router.push(`/checkout?promo=${promoApplied ? "EMEREN10" : ""}`)}
+                onClick={handleCheckout}
+                disabled={selectedIds.size === 0}
+                style={{ opacity: selectedIds.size === 0 ? 0.5 : 1, cursor: selectedIds.size === 0 ? "not-allowed" : "pointer" }}
               >
-                Proceed to Checkout <ArrowRight size={15} />
+                Proceed to Checkout ({selectedIds.size}) <ArrowRight size={15} />
               </button>
+              {selectedIds.size === 0 && (
+                <p style={{ fontSize: "11px", color: "#ef4444", textAlign: "center", marginTop: "6px" }}>Select at least one item to checkout.</p>
+              )}
 
               {delivery > 0 && (
                 <p style={{ fontSize: "11px", color: "#9ca3af", textAlign: "center", marginTop: "10px" }}>

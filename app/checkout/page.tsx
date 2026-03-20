@@ -95,7 +95,9 @@ export default function CheckoutPage() {
           qty: row.quantity,
         };
       });
-      setCart(items);
+      const selectedIds: string[] = JSON.parse(localStorage.getItem("checkout_selected_ids") ?? "[]");
+      const filtered = selectedIds.length > 0 ? items.filter((i) => selectedIds.includes(i.id)) : items;
+      setCart(filtered);
       setLoadingCart(false);
     });
   }, [user]);

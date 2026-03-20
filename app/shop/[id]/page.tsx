@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import {
   Triangle, ArrowLeft, ArrowRight, Star, Check, ShoppingCart,
   User, LogOut, Phone, MapPin, Clock, ChevronRight,
-  Shield, Wrench, Truck, Wind, Zap, Thermometer, Menu, X, AirVent,
+  Shield, Wrench, Truck, Wind, Zap, Thermometer, Menu, X, AirVent, CheckCircle,
 } from "lucide-react";
 import { BADGE_COLORS, type Variant, type Product } from "@/lib/products";
 
@@ -24,6 +24,8 @@ export default function ProductPage() {
   const [productLoading, setProductLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [added,         setAdded]         = useState(false);
+  const [tubeLength,    setTubeLength]    = useState(10);
+  const [tubeUnknown,   setTubeUnknown]   = useState(false);
   const [cartCount,     setCartCount]     = useState(0);
   const [user,          setUser]          = useState<{ id: string; email: string } | null>(null);
   const [userMenuOpen,  setUserMenuOpen]  = useState(false);
@@ -145,6 +147,41 @@ export default function ProductPage() {
     setAdded(true);
     setCartCount((c) => c + 1);
     setTimeout(() => setAdded(false), 1800);
+  };
+
+  const handleBuyNow = async () => {
+    if (!user) { router.push("/auth/signin"); return; }
+    if (!selectedVariant || !product) return;
+
+    const supabase = createClient();
+    const { data: existing } = await supabase
+      .from("cart_items")
+      .select("id, quantity")
+      .eq("user_id", user.id)
+      .eq("product_id", product.id)
+      .eq("variant_hp", selectedVariant.hp)
+      .maybeSingle();
+
+    let cartItemId = existing?.id ?? null;
+
+    if (existing) {
+      await (supabase.from("cart_items") as any)
+        .update({ quantity: existing.quantity + 1 })
+        .eq("id", existing.id);
+    } else {
+      const { data: inserted } = await (supabase.from("cart_items") as any).insert({
+        user_id: user.id,
+        product_id: product.id,
+        variant_hp: selectedVariant.hp,
+        quantity: 1,
+      }).select().single();
+      cartItemId = inserted?.id ?? null;
+    }
+
+    if (cartItemId) {
+      localStorage.setItem("checkout_selected_ids", JSON.stringify([cartItemId]));
+    }
+    router.push("/checkout");
   };
 
   if (productLoading) {
@@ -547,20 +584,95 @@ export default function ProductPage() {
               <span style={{ fontSize:"16px", color:"#d1d5db", textDecoration:"line-through" }}>{formatPrice(selectedVariant.orig)}</span>
               <span style={{ padding:"3px 10px", borderRadius:"7px", background:"rgba(239,68,68,0.1)", color:"#ef4444", fontSize:"12px", fontWeight:700 }}>{discount}% OFF</span>
             </div>
-            <p style={{ fontSize:"12px", color:"#9ca3af", marginBottom:"28px" }}>
-              Price for <strong style={{ color:"#1a1a2e" }}>{selectedVariant.hp}</strong> unit. Inclusive of VAT. Installation quote available in-store.
+            <p style={{ fontSize:"12px", color:"#9ca3af", marginBottom:"20px" }}>
+              Price for <strong style={{ color:"#1a1a2e" }}>{selectedVariant.hp}</strong> unit. Inclusive of VAT.
             </p>
+
+            {/* Installation Estimator */}
+            {(() => {
+              const extraFeet = Math.max(0, tubeLength - 10);
+              const extraCost = extraFeet * 300;
+              return (
+                <div style={{ background: "#fff", border: "1.5px solid rgba(0,0,0,0.08)", borderRadius: "14px", padding: "16px 18px", marginBottom: "24px" }}>
+                  <p style={{ fontSize: "11px", fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "4px" }}>Installation Estimator</p>
+                  <p style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "14px" }}>Estimate extra charges based on copper tube length needed.</p>
+
+                  {/* Counter or unknown */}
+                  {tubeUnknown ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                      <span style={{ fontSize: "13px", fontWeight: 600, color: "#374151" }}>Copper tube length</span>
+                      <span style={{ fontSize: "13px", fontWeight: 700, color: "#9ca3af" }}>Unknown</span>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                      <span style={{ fontSize: "13px", fontWeight: 600, color: "#374151" }}>Copper tube length</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <button onClick={() => setTubeLength((v) => Math.max(10, v - 1))}
+                          disabled={tubeLength <= 10}
+                          style={{ width: "30px", height: "30px", borderRadius: "8px", border: "1.5px solid rgba(0,0,0,0.12)", background: tubeLength <= 10 ? "#f3f4f6" : "#f8f7f4", cursor: tubeLength <= 10 ? "not-allowed" : "pointer", fontSize: "18px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, lineHeight: 1, opacity: tubeLength <= 10 ? 0.4 : 1 }}>−</button>
+                        <span style={{ fontSize: "15px", fontWeight: 800, color: "#1a1a2e", minWidth: "52px", textAlign: "center", fontFamily: "'Outfit',sans-serif" }}>{tubeLength} ft</span>
+                        <button onClick={() => setTubeLength((v) => Math.min(60, v + 1))}
+                          style={{ width: "30px", height: "30px", borderRadius: "8px", border: "1.5px solid rgba(0,0,0,0.12)", background: "#f8f7f4", cursor: "pointer", fontSize: "18px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, lineHeight: 1 }}>+</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Min 10ft note */}
+                  {!tubeUnknown && (
+                    <p style={{ fontSize: "11px", color: "#9ca3af", marginBottom: "10px", marginTop: "-6px" }}>
+                      All installations include a minimum of <strong style={{ color: "#374151" }}>10 ft copper tube</strong>. Additional footage is charged at ₱300/ft.
+                    </p>
+                  )}
+
+                  {/* I don't know toggle */}
+                  <button onClick={() => { setTubeUnknown((v) => !v); setTubeLength(10); }}
+                    style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: "12px" }}>
+                    <div style={{ width: "16px", height: "16px", borderRadius: "4px", border: `2px solid ${tubeUnknown ? "#d97706" : "#d1d5db"}`, background: tubeUnknown ? "#d97706" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {tubeUnknown && <Check size={10} color="#fff" strokeWidth={3} />}
+                    </div>
+                    <span style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280" }}>I don't know the distance</span>
+                  </button>
+
+                  {/* Result */}
+                  {tubeUnknown ? (
+                    <div style={{ padding: "10px 12px", borderRadius: "9px", background: "rgba(107,114,128,0.07)", border: "1px solid rgba(107,114,128,0.15)" }}>
+                      <p style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", margin: 0 }}>No worries — our technician will measure the distance on-site and inform you of any additional charge before proceeding.</p>
+                    </div>
+                  ) : extraCost === 0 ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 12px", borderRadius: "9px", background: "rgba(22,163,74,0.07)", border: "1px solid rgba(22,163,74,0.15)" }}>
+                      <CheckCircle size={13} color="#16a34a" />
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#16a34a" }}>Within 10 ft — copper tube included, no extra charge.</span>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "5px", padding: "10px 12px", borderRadius: "9px", background: "rgba(217,119,6,0.06)", border: "1px solid rgba(217,119,6,0.2)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#6b7280" }}>
+                        <span>First 10 ft</span><span style={{ fontWeight: 700, color: "#1a1a2e" }}>Included</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#6b7280" }}>
+                        <span>Extra {extraFeet} ft × ₱300/ft</span>
+                        <span style={{ fontWeight: 700, color: "#d97706" }}>+₱{extraCost.toLocaleString()}</span>
+                      </div>
+                      <div style={{ borderTop: "1px solid rgba(217,119,6,0.2)", marginTop: "4px", paddingTop: "6px", display: "flex", justifyContent: "space-between", fontSize: "13px", fontWeight: 700 }}>
+                        <span style={{ color: "#374151" }}>Est. install add-on</span>
+                        <span style={{ color: "#d97706" }}>+₱{extraCost.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
+                  <p style={{ fontSize: "10px", color: "#9ca3af", marginTop: "8px", marginBottom: 0 }}>Final amount confirmed on-site by our technician.</p>
+                </div>
+              );
+            })()}
 
             {/* CTA */}
             <div style={{ display:"flex", gap:"12px", flexWrap:"wrap" }}>
               <button className={`add-btn ${added ? "added" : ""}`} onClick={handleAdd} style={{ flex:1, minWidth:"160px", justifyContent:"center" }}>
                 {added ? <><Check size={16} /> Added to Cart</> : <><ShoppingCart size={16} /> Add to Cart</>}
               </button>
-              <a href="/checkout"
-                style={{ flex:1, minWidth:"160px", padding:"14px 20px", borderRadius:"14px", border:"none", background:"#1a1a2e", fontSize:"14px", fontWeight:700, color:"#fff", cursor:"pointer", display:"inline-flex", alignItems:"center", justifyContent:"center", gap:"8px", textDecoration:"none", transition:"all .2s" }}
+              <button onClick={handleBuyNow}
+                style={{ flex:1, minWidth:"160px", padding:"14px 20px", borderRadius:"14px", border:"none", background:"#1a1a2e", fontSize:"14px", fontWeight:700, color:"#fff", cursor:"pointer", display:"inline-flex", alignItems:"center", justifyContent:"center", gap:"8px", fontFamily:"'Plus Jakarta Sans',sans-serif", transition:"all .2s" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background="#d97706"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background="#1a1a2e"; }}
-              ><ShoppingCart size={15} /> Buy Now</a>
+              ><ShoppingCart size={15} /> Buy Now</button>
             </div>
           </div>
         </div>
